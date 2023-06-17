@@ -1,0 +1,11 @@
+{
+  "name": "Won match",
+  "description": "You won a match!",
+  "image": "https://ipfs.io/ipfs/QmVX3dFpmZFuF4iRzedrwuxP14bLRTGDXqxqsUSFE3R6pv?filename=won.jpg",
+  "attributes": [
+    {
+      "trait_type": "VAMOS MESSI",
+      "value": 100
+    }
+  ]
+}

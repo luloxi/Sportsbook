@@ -1,0 +1,11 @@
+{
+  "name": "Tie match",
+  "description": "You tied a match!",
+  "image": "https://ipfs.io/ipfs/QmZCYwt4EebrSicNK5ny7ZwMEs2khtMcNAUDHLosVC5Yaf?filename=tie.jpg",
+  "attributes": [
+    {
+      "trait_type": "tibio",
+      "value": 100
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "name": "Lost match",
+  "description": "You lost a match!",
+  "image": "https://ipfs.io/ipfs/QmVuLiTdKKKNkBngerjk8jwZuCj2DxWbgafcWMrhdqpqwz?filename=lost.jpg",
+  "attributes": [
+    {
+      "trait_type": "pechofrio",
+      "value": 100
+    }
+  ]
+}
