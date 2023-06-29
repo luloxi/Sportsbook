@@ -1,17 +1,15 @@
 // import Link from "next/link";
-// import { useState } from "react";
+import { useState } from "react";
+import { BigNumber } from "ethers";
 import type { NextPage } from "next";
 import { useAccount } from "wagmi";
 import { MetaHeader } from "~~/components/MetaHeader";
-import {
-  Address,
-  Balance,
-  /* IntegerInput */
-} from "~~/components/scaffold-eth";
+import { Address, Balance, IntegerInput } from "~~/components/scaffold-eth";
 import {
   /* useAccountBalance, */
   useDeployedContractInfo,
-  useScaffoldContractRead, // useScaffoldContractWrite,
+  useScaffoldContractRead,
+  useScaffoldContractWrite,
 } from "~~/hooks/scaffold-eth";
 
 const Home: NextPage = () => {
@@ -23,13 +21,13 @@ const Home: NextPage = () => {
     functionName: "viewNumberOne",
   });
 
-  // const [newNumber, setNewNumber] = useState("");
+  const [newNumber, setNewNumber] = useState<string | undefined>("");
 
-  // const { writeAsync: setNumberOne } = useScaffoldContractWrite({
-  //   contractName: "Sportsbook",
-  //   functionName: "setNumberOne",
-  //   args: [newNumber],
-  // });
+  const { writeAsync: setNumberOne } = useScaffoldContractWrite({
+    contractName: "Sportsbook",
+    functionName: "setNumberOne",
+    args: [newNumber ? BigNumber.from(newNumber) : undefined],
+  });
 
   return (
     <>
@@ -50,16 +48,20 @@ const Home: NextPage = () => {
                 <div>Number One: {numberOne?.toString()}</div>
               </div>
               <div className="p-10">
-                {/* <IntegerInput
-                  value={newNumber}
+                <IntegerInput
                   placeholder="Enter a number"
-                  onChange={v => {
-                    setNewNumber(v);
+                  onChange={newValue => {
+                    if (newValue) {
+                      setNewNumber(newValue.toString());
+                    } else {
+                      setNewNumber(undefined);
+                    }
                   }}
-                /> */}
-                {/* <button className="btn btn-primary" onClick={setNumberOne}>
+                  value={newNumber ?? ""}
+                />
+                <button className="btn btn-primary" onClick={setNumberOne}>
                   Set number one
-                </button> */}
+                </button>
               </div>
             </div>
           </h1>
