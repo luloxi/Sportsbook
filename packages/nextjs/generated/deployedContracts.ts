@@ -5,7 +5,7 @@ const contracts = {
       name: "localhost",
       contracts: {
         Sportsbook: {
-          address: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
           abi: [
             {
               inputs: [],
@@ -82,7 +82,7 @@ const contracts = {
                 },
                 {
                   internalType: "address",
-                  name: "locationProvider",
+                  name: "referee",
                   type: "address",
                 },
               ],
@@ -203,11 +203,24 @@ const contracts = {
                 },
                 {
                   internalType: "address",
-                  name: "locationProvider",
+                  name: "referee",
                   type: "address",
                 },
               ],
               stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "uint256",
+                  name: "newNumberOne",
+                  type: "uint256",
+                },
+              ],
+              name: "setNumberOne",
+              outputs: [],
+              stateMutability: "nonpayable",
               type: "function",
             },
             {
@@ -250,11 +263,11 @@ const contracts = {
                 },
                 {
                   internalType: "address",
-                  name: "_newLocationProvider",
+                  name: "_newReferee",
                   type: "address",
                 },
               ],
-              name: "updateLocationProvider",
+              name: "updateReferee",
               outputs: [],
               stateMutability: "nonpayable",
               type: "function",
@@ -273,6 +286,19 @@ const contracts = {
                   internalType: "address[3]",
                   name: "",
                   type: "address[3]",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [],
+              name: "viewNumberOne",
+              outputs: [
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
                 },
               ],
               stateMutability: "view",

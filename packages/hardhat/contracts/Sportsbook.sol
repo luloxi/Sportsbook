@@ -1,17 +1,43 @@
+// Layout of Contract:
+// version
+// imports
+// errors
+// interfaces, libraries, contracts
+// Type declarations
+// State variables
+// Events
+// Modifiers
+// Functions
+
+// Layout of Functions:
+// constructor
+// receive function (if exists)
+// fallback function (if exists)
+// external
+// public
+// internal
+// private
+// view & pure functions
+
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
-struct MatchChallenge {
-    address team1;
-    address team2;
-    bool accepted;
-    bool started;
-    bool finished;
-    uint256 amount;
-    address referee;
-}
-
+/**
+ * @title A sports betting contract
+ * @author Lulox
+ * @notice This contract is for creating a bet between two parts with a referee that decides who wins the betted amount
+ */
 contract Sportsbook {
+    struct MatchChallenge {
+        address team1;
+        address team2;
+        bool accepted;
+        bool started;
+        bool finished;
+        uint256 amount;
+        address referee;
+    }
+
     MatchChallenge[] public matchChallenges;
 
     event ChallengeResult(uint256 indexed MatchChallengeId, uint8 team1Result, uint8 team2Result);
@@ -64,9 +90,11 @@ contract Sportsbook {
         // Interact
         (bool success,) =
             payable(matchChallenges[_challengeId].team1).call{value: matchChallenges[_challengeId].amount}("");
+        require(success, "Sportsbook: Transfer to team1 failed.");
         if (matchChallenges[_challengeId].accepted == true) {
             (bool success2,) =
                 payable(matchChallenges[_challengeId].team2).call{value: matchChallenges[_challengeId].amount}("");
+            require(success2, "Sportsbook: Transfer to team2 failed.");
         }
     }
 
@@ -93,16 +121,20 @@ contract Sportsbook {
         if (_team1Result > _team2Result) {
             (bool success,) =
                 payable(matchChallenges[_challengeId].team1).call{value: matchChallenges[_challengeId].amount * 2}("");
+            require(success, "Sportsbook: Transfer to team1 failed.");
         }
         if (_team1Result < _team2Result) {
             (bool success,) =
                 payable(matchChallenges[_challengeId].team2).call{value: matchChallenges[_challengeId].amount * 2}("");
+            require(success, "Sportsbook: Transfer to team2 failed.");
         }
         if (_team1Result == _team2Result) {
             (bool success,) =
                 payable(matchChallenges[_challengeId].team1).call{value: matchChallenges[_challengeId].amount}("");
             (bool success2,) =
                 payable(matchChallenges[_challengeId].team2).call{value: matchChallenges[_challengeId].amount}("");
+            require(success, "Sportsbook: Transfer to team1 failed.");
+            require(success2, "Sportsbook: Transfer to team2 failed.");
         }
     }
 
@@ -124,5 +156,15 @@ contract Sportsbook {
 
     function isMatchFinished(uint256 _id) public view returns (bool) {
         return matchChallenges[_id].finished;
+    }
+
+    uint256 numberOne = 1;
+
+    function setNumberOne(uint256 newNumberOne) public {
+        numberOne = newNumberOne;
+    }
+
+    function viewNumberOne() public view returns (uint256) {
+        return numberOne;
     }
 }
