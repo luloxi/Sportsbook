@@ -146,6 +146,10 @@ contract Sportsbook {
         return answer;
     }
 
+    function viewMatchBet(uint256 _id) public view returns (uint256) {
+        return matchChallenges[_id].amount;
+    }
+
     function isMatchAccepted(uint256 _id) public view returns (bool) {
         return matchChallenges[_id].accepted;
     }
