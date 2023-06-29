@@ -54,6 +54,46 @@ contract Sportsbook {
         matchChallenges[_challengeId].accepted = true;
     }
 
+    function startChallenge(uint256 _challengeId) public {
+        // Check
+        require(matchChallenges[_challengeId].accepted == true, "Team2 hasn't accepted the challenge!");
+        require(matchChallenges[_challengeId].referee == msg.sender, "You're not the location provider!");
+        require(matchChallenges[_challengeId].team2 != address(0), "Lacking a team or match canceled");
+
+        // Effect
+        matchChallenges[_challengeId].started = true;
+    }
+
+    function completeChallenge(uint256 _challengeId, uint8 _team1Result, uint8 _team2Result) public {
+        // Check
+        require(matchChallenges[_challengeId].started == true, "Challenge hasn't started!");
+        require(matchChallenges[_challengeId].finished == false, "Challenge already completed");
+        require(matchChallenges[_challengeId].team2 != address(0), "There must be a team2!");
+        require(msg.sender == matchChallenges[_challengeId].referee, "You must be the location provider to say who won");
+        // Effect
+        matchChallenges[_challengeId].finished = true;
+        emit ChallengeResult(_challengeId, _team1Result, _team2Result);
+        // Interact
+        if (_team1Result > _team2Result) {
+            (bool success,) =
+                payable(matchChallenges[_challengeId].team1).call{value: matchChallenges[_challengeId].amount * 2}("");
+            require(success, "Sportsbook: Transfer to team1 failed.");
+        }
+        if (_team1Result < _team2Result) {
+            (bool success,) =
+                payable(matchChallenges[_challengeId].team2).call{value: matchChallenges[_challengeId].amount * 2}("");
+            require(success, "Sportsbook: Transfer to team2 failed.");
+        }
+        if (_team1Result == _team2Result) {
+            (bool success,) =
+                payable(matchChallenges[_challengeId].team1).call{value: matchChallenges[_challengeId].amount}("");
+            (bool success2,) =
+                payable(matchChallenges[_challengeId].team2).call{value: matchChallenges[_challengeId].amount}("");
+            require(success, "Sportsbook: Transfer to team1 failed.");
+            require(success2, "Sportsbook: Transfer to team2 failed.");
+        }
+    }
+
     function updateChallengedTeam(uint256 _challengeId, address _newTeam2) public {
         require(msg.sender == matchChallenges[_challengeId].team1, "You're not the team1!");
         require(matchChallenges[_challengeId].accepted != true, "Challenge has already been accepted!");
@@ -94,46 +134,6 @@ contract Sportsbook {
         if (matchChallenges[_challengeId].accepted == true) {
             (bool success2,) =
                 payable(matchChallenges[_challengeId].team2).call{value: matchChallenges[_challengeId].amount}("");
-            require(success2, "Sportsbook: Transfer to team2 failed.");
-        }
-    }
-
-    function startChallenge(uint256 _challengeId) public {
-        // Check
-        require(matchChallenges[_challengeId].accepted == true, "Team2 hasn't accepted the challenge!");
-        require(matchChallenges[_challengeId].referee == msg.sender, "You're not the location provider!");
-        require(matchChallenges[_challengeId].team2 != address(0), "Lacking a team or match canceled");
-
-        // Effect
-        matchChallenges[_challengeId].started = true;
-    }
-
-    function completeChallenge(uint256 _challengeId, uint8 _team1Result, uint8 _team2Result) public {
-        // Check
-        require(matchChallenges[_challengeId].started == true, "Challenge hasn't started!");
-        require(matchChallenges[_challengeId].finished == false, "Challenge already completed");
-        require(matchChallenges[_challengeId].team2 != address(0), "There must be a team2!");
-        require(msg.sender == matchChallenges[_challengeId].referee, "You must be the location provider to say who won");
-        // Effect
-        matchChallenges[_challengeId].finished = true;
-        emit ChallengeResult(_challengeId, _team1Result, _team2Result);
-        // Interact
-        if (_team1Result > _team2Result) {
-            (bool success,) =
-                payable(matchChallenges[_challengeId].team1).call{value: matchChallenges[_challengeId].amount * 2}("");
-            require(success, "Sportsbook: Transfer to team1 failed.");
-        }
-        if (_team1Result < _team2Result) {
-            (bool success,) =
-                payable(matchChallenges[_challengeId].team2).call{value: matchChallenges[_challengeId].amount * 2}("");
-            require(success, "Sportsbook: Transfer to team2 failed.");
-        }
-        if (_team1Result == _team2Result) {
-            (bool success,) =
-                payable(matchChallenges[_challengeId].team1).call{value: matchChallenges[_challengeId].amount}("");
-            (bool success2,) =
-                payable(matchChallenges[_challengeId].team2).call{value: matchChallenges[_challengeId].amount}("");
-            require(success, "Sportsbook: Transfer to team1 failed.");
             require(success2, "Sportsbook: Transfer to team2 failed.");
         }
     }
