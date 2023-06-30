@@ -1,16 +1,12 @@
 // import Link from "next/link";
 import { useState } from "react";
+import { Switch } from "@chakra-ui/react";
 import { BigNumber, ethers } from "ethers";
 import type { NextPage } from "next";
 import { useAccount } from "wagmi";
 import { MetaHeader } from "~~/components/MetaHeader";
 import { Address, AddressInput, Balance, EtherInput, IntegerInput } from "~~/components/scaffold-eth";
-import {
-  /* useAccountBalance, */
-  useDeployedContractInfo,
-  useScaffoldContractRead,
-  useScaffoldContractWrite,
-} from "~~/hooks/scaffold-eth";
+import { useDeployedContractInfo, useScaffoldContractRead, useScaffoldContractWrite } from "~~/hooks/scaffold-eth";
 
 const Home: NextPage = () => {
   const { address } = useAccount();
@@ -22,22 +18,24 @@ const Home: NextPage = () => {
   const [acceptChallengeId, setAcceptChallengeId] = useState<string>("");
   const [acceptChallengeValue, setAcceptChallengeValue] = useState<string>("");
   const [startChallengeId, setStartChallengeId] = useState<string>("");
-
-  // const { data: numberOne } = useScaffoldContractRead({
-  //   contractName: "Sportsbook",
-  //   functionName: "viewNumberOne",
-  // });
-
-  // const { writeAsync: setNumberOne } = useScaffoldContractWrite({
-  //   contractName: "Sportsbook",
-  //   functionName: "setNumberOne",
-  //   args: [newNumber ? BigNumber.from(newNumber) : undefined],
-  // });
+  const [completeChallengeId, setCompleteChallengeId] = useState<string>("");
+  const [completeChallengeTeam1Score, setCompleteChallengeTeam1Score] = useState<string>("");
+  const [completeChallengeTeam2Score, setCompleteChallengeTeam2Score] = useState<string>("");
+  const [updateRefereeId, setUpdateRefereeId] = useState<string>("");
+  const [updateRefereeAddress, setUpdateRefereeAddress] = useState<string>("");
+  const [answerUpdateRefereeId, setAnswerUpdateRefereeId] = useState<string>("");
+  const [answerUpdateRefereeChoice, setAnswerUpdateRefereeChoice] = useState<boolean>(false);
 
   const { data: viewMatchBet } = useScaffoldContractRead({
     contractName: "Sportsbook",
     functionName: "viewMatchBet",
     args: [acceptChallengeId ? BigNumber.from(acceptChallengeId) : undefined],
+  });
+
+  const { data: viewRequestedReferee } = useScaffoldContractRead({
+    contractName: "Sportsbook",
+    functionName: "viewRequestedReferee",
+    args: [answerUpdateRefereeId ? BigNumber.from(answerUpdateRefereeId) : undefined],
   });
 
   const { writeAsync: createChallenge } = useScaffoldContractWrite({
@@ -54,10 +52,38 @@ const Home: NextPage = () => {
     value: acceptChallengeValue ? acceptChallengeValue.toString() : undefined,
   });
 
+  const { writeAsync: deleteChallenge } = useScaffoldContractWrite({
+    contractName: "Sportsbook",
+    functionName: "deleteChallenge",
+    args: [acceptChallengeId ? BigNumber.from(acceptChallengeId) : undefined],
+  });
+
   const { writeAsync: startChallenge } = useScaffoldContractWrite({
     contractName: "Sportsbook",
     functionName: "startChallenge",
     args: [startChallengeId ? BigNumber.from(startChallengeId) : undefined],
+  });
+
+  const { writeAsync: completeChallenge } = useScaffoldContractWrite({
+    contractName: "Sportsbook",
+    functionName: "completeChallenge",
+    args: [
+      completeChallengeId ? BigNumber.from(completeChallengeId) : undefined,
+      completeChallengeTeam1Score ? parseInt(completeChallengeTeam1Score) : undefined,
+      completeChallengeTeam2Score ? parseInt(completeChallengeTeam2Score) : undefined,
+    ],
+  });
+
+  const { writeAsync: updateReferee } = useScaffoldContractWrite({
+    contractName: "Sportsbook",
+    functionName: "updateReferee",
+    args: [updateRefereeId ? BigNumber.from(updateRefereeId) : undefined, updateRefereeAddress],
+  });
+
+  const { writeAsync: answerUpdateReferee } = useScaffoldContractWrite({
+    contractName: "Sportsbook",
+    functionName: "answerUpdateReferee",
+    args: [answerUpdateRefereeId ? BigNumber.from(answerUpdateRefereeId) : undefined, answerUpdateRefereeChoice],
   });
 
   return (
@@ -127,6 +153,9 @@ const Home: NextPage = () => {
             <button className="btn btn-primary" onClick={acceptChallenge}>
               Accept challenge
             </button>
+            <button className="btn btn-primary" onClick={deleteChallenge}>
+              Cancel challenge
+            </button>
             <h2 className="mt-10 font-bold">Start challenge</h2>
             <span className="text-sm">Exists?: </span>
             <span className="text-sm">Has started?: </span>
@@ -143,6 +172,92 @@ const Home: NextPage = () => {
             />
             <button className="btn btn-primary" onClick={startChallenge}>
               Start challenge
+            </button>
+            <h2 className="mt-10 font-bold">Complete challenge</h2>
+            <IntegerInput
+              placeholder="Enter challenge ID"
+              value={completeChallengeId}
+              onChange={newValue => {
+                if (newValue) {
+                  setCompleteChallengeId(newValue.toString());
+                } else {
+                  setCompleteChallengeId("");
+                }
+              }}
+            />
+            <IntegerInput
+              placeholder="Enter score for team 1"
+              value={completeChallengeTeam1Score}
+              onChange={newValue => {
+                if (newValue) {
+                  setCompleteChallengeTeam1Score(newValue.toString());
+                } else {
+                  setCompleteChallengeTeam1Score("");
+                }
+              }}
+            />
+            <IntegerInput
+              placeholder="Enter score for team 2"
+              value={completeChallengeTeam2Score}
+              onChange={newValue => {
+                if (newValue) {
+                  setCompleteChallengeTeam2Score(newValue.toString());
+                } else {
+                  setCompleteChallengeTeam2Score("");
+                }
+              }}
+            />
+            <button className="btn btn-primary" onClick={completeChallenge}>
+              Complete challenge
+            </button>
+            <h2 className="mt-10 font-bold">Create &quot;update referee&quot; request</h2>
+            <IntegerInput
+              placeholder="Enter challenge ID"
+              value={updateRefereeId}
+              onChange={newValue => {
+                if (newValue) {
+                  setUpdateRefereeId(newValue.toString());
+                } else {
+                  setUpdateRefereeId("");
+                }
+              }}
+            />
+            <AddressInput
+              placeholder="Enter address for new referee"
+              value={updateRefereeAddress}
+              onChange={newValue => {
+                if (newValue) {
+                  setUpdateRefereeAddress(newValue.toString());
+                } else {
+                  setUpdateRefereeAddress("");
+                }
+              }}
+            />
+            <button className="btn btn-primary" onClick={updateReferee}>
+              Create request
+            </button>
+            <h2 className="mt-10 font-bold">Answer &quot;update referee&quot; request</h2>
+            <IntegerInput
+              placeholder="Enter challenge ID"
+              value={answerUpdateRefereeId}
+              onChange={newValue => {
+                if (newValue) {
+                  setAnswerUpdateRefereeId(newValue.toString());
+                } else {
+                  setAnswerUpdateRefereeId("");
+                }
+              }}
+            />
+            <span className="text-sm">Requested change to this referee: {viewRequestedReferee}</span>
+            <span className="text-sm">Do you accept the new referee?: </span>
+            <Switch
+              className="mb-2"
+              id="answer-update-choice"
+              checked={answerUpdateRefereeChoice}
+              onChange={event => setAnswerUpdateRefereeChoice(event.target.checked)}
+            />
+            <button className="btn btn-primary" onClick={answerUpdateReferee}>
+              Answer request
             </button>
           </div>
         </div>

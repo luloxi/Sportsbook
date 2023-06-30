@@ -5,7 +5,7 @@ const contracts = {
       name: "localhost",
       contracts: {
         Sportsbook: {
-          address: "0x0165878A594ca255338adfa4d48449f69242Eb8F",
+          address: "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
           abi: [
             {
               inputs: [],
@@ -48,6 +48,24 @@ const contracts = {
               name: "acceptChallenge",
               outputs: [],
               stateMutability: "payable",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "uint256",
+                  name: "_challengeId",
+                  type: "uint256",
+                },
+                {
+                  internalType: "bool",
+                  name: "_choice",
+                  type: "bool",
+                },
+              ],
+              name: "answerUpdateReferee",
+              outputs: [],
+              stateMutability: "nonpayable",
               type: "function",
             },
             {
@@ -108,63 +126,6 @@ const contracts = {
               inputs: [
                 {
                   internalType: "uint256",
-                  name: "_id",
-                  type: "uint256",
-                },
-              ],
-              name: "isMatchAccepted",
-              outputs: [
-                {
-                  internalType: "bool",
-                  name: "",
-                  type: "bool",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "uint256",
-                  name: "_id",
-                  type: "uint256",
-                },
-              ],
-              name: "isMatchFinished",
-              outputs: [
-                {
-                  internalType: "bool",
-                  name: "",
-                  type: "bool",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "uint256",
-                  name: "_id",
-                  type: "uint256",
-                },
-              ],
-              name: "isMatchStarted",
-              outputs: [
-                {
-                  internalType: "bool",
-                  name: "",
-                  type: "bool",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "uint256",
                   name: "",
                   type: "uint256",
                 },
@@ -182,19 +143,9 @@ const contracts = {
                   type: "address",
                 },
                 {
-                  internalType: "bool",
-                  name: "accepted",
-                  type: "bool",
-                },
-                {
-                  internalType: "bool",
-                  name: "started",
-                  type: "bool",
-                },
-                {
-                  internalType: "bool",
-                  name: "finished",
-                  type: "bool",
+                  internalType: "enum Sportsbook.MatchState",
+                  name: "state",
+                  type: "uint8",
                 },
                 {
                   internalType: "uint256",
@@ -245,11 +196,11 @@ const contracts = {
                 },
                 {
                   internalType: "address",
-                  name: "_newTeam2",
+                  name: "_newReferee",
                   type: "address",
                 },
               ],
-              name: "updateChallengedTeam",
+              name: "updateReferee",
               outputs: [],
               stateMutability: "nonpayable",
               type: "function",
@@ -258,18 +209,29 @@ const contracts = {
               inputs: [
                 {
                   internalType: "uint256",
-                  name: "_challengeId",
+                  name: "",
                   type: "uint256",
+                },
+              ],
+              name: "updateRefereeRequests",
+              outputs: [
+                {
+                  internalType: "address",
+                  name: "proposingTeam",
+                  type: "address",
                 },
                 {
                   internalType: "address",
-                  name: "_newReferee",
+                  name: "newReferee",
                   type: "address",
                 },
+                {
+                  internalType: "bool",
+                  name: "accepted",
+                  type: "bool",
+                },
               ],
-              name: "updateReferee",
-              outputs: [],
-              stateMutability: "nonpayable",
+              stateMutability: "view",
               type: "function",
             },
             {
@@ -311,6 +273,44 @@ const contracts = {
               type: "function",
             },
             {
+              inputs: [
+                {
+                  internalType: "uint256",
+                  name: "_id",
+                  type: "uint256",
+                },
+              ],
+              name: "viewMatchReferee",
+              outputs: [
+                {
+                  internalType: "address",
+                  name: "",
+                  type: "address",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "uint256",
+                  name: "_id",
+                  type: "uint256",
+                },
+              ],
+              name: "viewMatchState",
+              outputs: [
+                {
+                  internalType: "enum Sportsbook.MatchState",
+                  name: "",
+                  type: "uint8",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
               inputs: [],
               name: "viewNumberOne",
               outputs: [
@@ -318,6 +318,25 @@ const contracts = {
                   internalType: "uint256",
                   name: "",
                   type: "uint256",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "uint256",
+                  name: "_id",
+                  type: "uint256",
+                },
+              ],
+              name: "viewRequestedReferee",
+              outputs: [
+                {
+                  internalType: "address",
+                  name: "",
+                  type: "address",
                 },
               ],
               stateMutability: "view",
