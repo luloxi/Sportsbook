@@ -1,6 +1,6 @@
 // import Link from "next/link";
 import { useState } from "react";
-import { Switch } from "@chakra-ui/react";
+// import { Switch } from "@chakra-ui/react";
 import { BigNumber, ethers } from "ethers";
 import type { NextPage } from "next";
 import { useAccount } from "wagmi";
@@ -24,7 +24,7 @@ const Home: NextPage = () => {
   const [updateRefereeId, setUpdateRefereeId] = useState<string>("");
   const [updateRefereeAddress, setUpdateRefereeAddress] = useState<string>("");
   const [answerUpdateRefereeId, setAnswerUpdateRefereeId] = useState<string>("");
-  const [answerUpdateRefereeChoice, setAnswerUpdateRefereeChoice] = useState<boolean>(false);
+  // const [answerUpdateRefereeChoice, setAnswerUpdateRefereeChoice] = useState<boolean>(false);
 
   const { data: viewMatchBet } = useScaffoldContractRead({
     contractName: "Sportsbook",
@@ -80,11 +80,11 @@ const Home: NextPage = () => {
     args: [updateRefereeId ? BigNumber.from(updateRefereeId) : undefined, updateRefereeAddress],
   });
 
-  const { writeAsync: answerUpdateReferee } = useScaffoldContractWrite({
-    contractName: "Sportsbook",
-    functionName: "answerUpdateReferee",
-    args: [answerUpdateRefereeId ? BigNumber.from(answerUpdateRefereeId) : undefined, answerUpdateRefereeChoice],
-  });
+  // const { writeAsync: answerUpdateReferee } = useScaffoldContractWrite({
+  //   contractName: "Sportsbook",
+  //   functionName: "answerUpdateReferee",
+  //   args: [answerUpdateRefereeId ? BigNumber.from(answerUpdateRefereeId) : undefined, answerUpdateRefereeChoice],
+  // });
 
   return (
     <>
@@ -99,16 +99,20 @@ const Home: NextPage = () => {
             <Address address={sportsbookInfo?.address} />
             <Balance address={sportsbookInfo?.address} />
             <h2 className="mt-2 font-bold">Create challenge</h2>
+            Enter the address of who you wanna challenge
             <AddressInput
               placeholder="Enter address for team 2"
               onChange={setCreateChallengeTeam2Address}
               value={createChallengeTeam2Address ?? ""}
             />
+            Referee will put the correct result of the match, and get paid his commission
             <AddressInput
               placeholder="Enter address for referee"
               onChange={setCreateChallengeRefereeAddress}
               value={createChallengeRefereeAddress ?? ""}
             />
+            Enter here how much ETH you want to bet, <br />
+            your oponent will have to pay the same amount to be able to accept
             <EtherInput
               placeholder="Enter your bet amount in ETH or USD"
               onChange={newValue => {
@@ -250,15 +254,15 @@ const Home: NextPage = () => {
             />
             <span className="text-sm">Requested change to this referee: {viewRequestedReferee}</span>
             <span className="text-sm">Do you accept the new referee?: </span>
-            <Switch
+            {/* <Switch
               className="mb-2"
               id="answer-update-choice"
               checked={answerUpdateRefereeChoice}
               onChange={event => setAnswerUpdateRefereeChoice(event.target.checked)}
-            />
-            <button className="btn btn-primary" onClick={answerUpdateReferee}>
+            /> */}
+            {/* <button className="btn btn-primary" onClick={answerUpdateReferee}>
               Answer request
-            </button>
+            </button> */}
           </div>
         </div>
       </div>

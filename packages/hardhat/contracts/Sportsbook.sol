@@ -39,7 +39,7 @@ contract Sportsbook {
         address team1;
         address team2;
         MatchState state;
-        uint256 amount;
+        uint256 bet;
         address referee;
     }
 
@@ -62,7 +62,7 @@ contract Sportsbook {
 
     function acceptChallenge(uint256 _challengeId) public payable {
         require(msg.sender == matchChallenges[_challengeId].team2, "You're not the challenged team!");
-        require(msg.value >= matchChallenges[_challengeId].amount, "Haven't sent enough ETH!");
+        require(msg.value >= matchChallenges[_challengeId].bet, "Haven't sent enough ETH!");
 
         matchChallenges[_challengeId].state = MatchState.ACCEPTED;
     }
@@ -88,19 +88,19 @@ contract Sportsbook {
         // Interact
         if (_team1Result > _team2Result) {
             (bool success,) =
-                payable(matchChallenges[_challengeId].team1).call{value: matchChallenges[_challengeId].amount * 2}("");
+                payable(matchChallenges[_challengeId].team1).call{value: matchChallenges[_challengeId].bet * 2}("");
             require(success, "Sportsbook: Transfer to team1 failed.");
         }
         if (_team1Result < _team2Result) {
             (bool success,) =
-                payable(matchChallenges[_challengeId].team2).call{value: matchChallenges[_challengeId].amount * 2}("");
+                payable(matchChallenges[_challengeId].team2).call{value: matchChallenges[_challengeId].bet * 2}("");
             require(success, "Sportsbook: Transfer to team2 failed.");
         }
         if (_team1Result == _team2Result) {
             (bool success,) =
-                payable(matchChallenges[_challengeId].team1).call{value: matchChallenges[_challengeId].amount}("");
+                payable(matchChallenges[_challengeId].team1).call{value: matchChallenges[_challengeId].bet}("");
             (bool success2,) =
-                payable(matchChallenges[_challengeId].team2).call{value: matchChallenges[_challengeId].amount}("");
+                payable(matchChallenges[_challengeId].team2).call{value: matchChallenges[_challengeId].bet}("");
             require(success, "Sportsbook: Transfer to team1 failed.");
             require(success2, "Sportsbook: Transfer to team2 failed.");
         }
@@ -138,25 +138,29 @@ contract Sportsbook {
         matchChallenges[_challengeId].state = MatchState.FINISHED;
         // Interact
         (bool success,) =
-            payable(matchChallenges[_challengeId].team1).call{value: matchChallenges[_challengeId].amount}("");
+            payable(matchChallenges[_challengeId].team1).call{value: matchChallenges[_challengeId].bet}("");
         require(success, "Sportsbook: Transfer to team1 failed.");
         if (matchChallenges[_challengeId].state == MatchState.ACCEPTED) {
             (bool success2,) =
-                payable(matchChallenges[_challengeId].team2).call{value: matchChallenges[_challengeId].amount}("");
+                payable(matchChallenges[_challengeId].team2).call{value: matchChallenges[_challengeId].bet}("");
             require(success2, "Sportsbook: Transfer to team2 failed.");
         }
     }
 
-    function viewMatchChallenge(uint256 _id) public view returns (address[3] memory) {
-        address team1 = matchChallenges[_id].team1;
-        address team2 = matchChallenges[_id].team2;
-        address referee = matchChallenges[_id].referee;
-        address[3] memory answer = [team1, team2, referee];
-        return answer;
+    function viewMatchChallenge(uint256 _id)
+        public
+        view
+        returns (address team1, address team2, MatchState state, uint256 bet, address referee)
+    {
+        team1 = matchChallenges[_id].team1;
+        team2 = matchChallenges[_id].team2;
+        state = matchChallenges[_id].state;
+        bet = matchChallenges[_id].bet;
+        referee = matchChallenges[_id].referee;
     }
 
     function viewMatchBet(uint256 _id) public view returns (uint256) {
-        return matchChallenges[_id].amount;
+        return matchChallenges[_id].bet;
     }
 
     function viewMatchReferee(uint256 _id) public view returns (address) {
@@ -169,15 +173,5 @@ contract Sportsbook {
 
     function viewMatchState(uint256 _id) public view returns (MatchState) {
         return matchChallenges[_id].state;
-    }
-
-    uint256 numberOne = 1;
-
-    function setNumberOne(uint256 newNumberOne) public {
-        numberOne = newNumberOne;
-    }
-
-    function viewNumberOne() public view returns (uint256) {
-        return numberOne;
     }
 }
