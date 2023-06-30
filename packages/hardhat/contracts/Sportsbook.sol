@@ -119,13 +119,12 @@ contract Sportsbook {
         require(matchChallenges[_challengeId].state < MatchState.STARTED, "Challenge has already been started!");
         require(updateRefereeRequests[_challengeId].state == UpdateRefereeState.INACTIVE, "There's already a request!");
 
-        updateRefereeRequests[_challengeId].state = UpdateRefereeState.PENDING;
-        updateRefereeRequests.push(UpdateReferee(msg.sender, _newReferee, false));
+        updateRefereeRequests[_challengeId] = UpdateReferee(msg.sender, _newReferee, UpdateRefereeState.PENDING);
     }
 
     function answerUpdateReferee(uint256 _challengeId, bool _choice) public {
         require(msg.sender != updateRefereeRequests[_challengeId].proposingTeam);
-        require(updateRefereeRequests[_challengeId].accepted == false);
+        require(updateRefereeRequests[_challengeId].state == UpdateRefereeState.PENDING, "There's no request!");
 
         updateRefereeRequests[_challengeId].state = UpdateRefereeState.INACTIVE;
         if (_choice == true) {
@@ -167,6 +166,10 @@ contract Sportsbook {
         referee = matchChallenges[_id].referee;
     }
 
+    function viewMatchCount() public view returns (uint256) {
+        return matchChallenges.length;
+    }
+
     function viewMatchState(uint256 _id) public view returns (MatchState) {
         return matchChallenges[_id].state;
     }
@@ -186,7 +189,7 @@ contract Sportsbook {
     {
         proposingTeam = updateRefereeRequests[_challengeId].proposingTeam;
         newReferee = updateRefereeRequests[_challengeId].newReferee;
-        accepted = updateRefereeRequests[_challengeId].state;
+        state = updateRefereeRequests[_challengeId].state;
     }
 
     function viewRequestedReferee(uint256 _id) public view returns (address) {

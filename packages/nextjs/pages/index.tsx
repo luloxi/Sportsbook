@@ -1,6 +1,8 @@
 // import Link from "next/link";
 import { useState } from "react";
+// import { useEffect } from "react";
 import { Switch } from "@chakra-ui/react";
+import { Button, Card, CardBody, CardFooter, Heading, Stack } from "@chakra-ui/react";
 import { BigNumber, ethers } from "ethers";
 import type { NextPage } from "next";
 import { useAccount } from "wagmi";
@@ -12,6 +14,8 @@ const Home: NextPage = () => {
   const { address } = useAccount();
   const { data: sportsbookInfo } = useDeployedContractInfo("Sportsbook");
 
+  // const [matches, setMatches] = useState<any[]>([]);
+  // const [viewMatchChallengeId, setViewMatchChallengeId] = useState<string>("");
   const [createChallengeTeam2Address, setCreateChallengeTeam2Address] = useState<string | undefined>("");
   const [createChallengeRefereeAddress, setCreateChallengeRefereeAddress] = useState<string | undefined>("");
   const [createChallengeValue, setCreateChallengeValue] = useState<string>("");
@@ -37,6 +41,17 @@ const Home: NextPage = () => {
     functionName: "viewRequestedReferee",
     args: [answerUpdateRefereeId ? BigNumber.from(answerUpdateRefereeId) : undefined],
   });
+
+  // const { data: viewMatchCount } = useScaffoldContractRead({
+  //   contractName: "Sportsbook",
+  //   functionName: "viewMatchCount",
+  // });
+
+  // const { data: viewMatchChallenge } = useScaffoldContractRead({
+  //   contractName: "Sportsbook",
+  //   functionName: "viewMatchChallenge",
+  //   args: [viewMatchChallengeId ? BigNumber.from(viewMatchChallengeId) : undefined],
+  // });
 
   const { writeAsync: createChallenge } = useScaffoldContractWrite({
     contractName: "Sportsbook",
@@ -86,10 +101,75 @@ const Home: NextPage = () => {
     args: [answerUpdateRefereeId ? BigNumber.from(answerUpdateRefereeId) : undefined, answerUpdateRefereeChoice],
   });
 
+  // useEffect(() => {
+  //   if (viewMatchCount && viewMatchCount.gt(0)) {
+  //     const tempMatches = [];
+
+  //     // Search and retrieve data from all the matches according to the match count
+  //     // with the order reversed to show the newest at the top
+  //     for (let i = viewMatchCount.toNumber() - 1; i >= 0; i--) {
+  //       tempMatches.push(viewMatchChallenge);
+  //       setViewMatchChallengeId((i + 1).toString()); // convert number to string
+  //     }
+
+  //     // Log the tempMatches array
+  //     console.log("tempMatches:", tempMatches);
+
+  //     // Set the list of matches to the state
+  //     Promise.all(tempMatches).then(matches => {
+  //       setMatches(matches);
+  //     });
+  //   }
+  // }, [viewMatchCount]);
+
   return (
     <>
       <MetaHeader />
       <div className="flex items-center flex-col flex-grow pt-10 text-center mb-8">
+        <Card direction={{ base: "column", sm: "row" }} overflow="hidden" variant="outline">
+          <Stack>
+            <CardBody>
+              <Heading size="md">🏀 Challenge another team to a match! ⚽</Heading>
+              Enter address of who you want to challenge
+              <AddressInput
+                placeholder="Enter address for team 2"
+                onChange={setCreateChallengeTeam2Address}
+                value={createChallengeTeam2Address ?? ""}
+              />
+              <br />
+              Propose a referee to input the result of the match
+              <AddressInput
+                placeholder="Enter address for referee"
+                onChange={setCreateChallengeRefereeAddress}
+                value={createChallengeRefereeAddress ?? ""}
+              />
+              <br />
+              (optional) Bet ETH on the match outcome, <br />
+              your oponent will have to pay the same to accept.
+              <br />
+              <EtherInput
+                placeholder="Enter your bet amount in ETH or USD"
+                onChange={newValue => {
+                  if (newValue) {
+                    setCreateChallengeValue(newValue);
+                  } else {
+                    setCreateChallengeValue("");
+                  }
+                }}
+                value={createChallengeValue}
+              />
+              <br />
+              Winner gets all, Tie gives back the ETH.
+            </CardBody>
+
+            <CardFooter>
+              <Button variant="solid" onClick={createChallenge} colorScheme="blue">
+                Create challenge
+              </Button>
+            </CardFooter>
+          </Stack>
+        </Card>
+
         <div className="px-5">
           <div className="flex flex-col items-center justify-center w-full flex-grow">
             <h2 className="mt-2">Current user</h2>
@@ -99,34 +179,21 @@ const Home: NextPage = () => {
             <Address address={sportsbookInfo?.address} />
             <Balance address={sportsbookInfo?.address} />
             <h2 className="mt-2 font-bold">Create challenge</h2>
-            Enter the address of who you wanna challenge
-            <AddressInput
-              placeholder="Enter address for team 2"
-              onChange={setCreateChallengeTeam2Address}
-              value={createChallengeTeam2Address ?? ""}
-            />
-            Referee will put the correct result of the match, and get paid his commission
-            <AddressInput
-              placeholder="Enter address for referee"
-              onChange={setCreateChallengeRefereeAddress}
-              value={createChallengeRefereeAddress ?? ""}
-            />
-            Enter here how much ETH you want to bet, <br />
-            your oponent will have to pay the same amount to be able to accept
-            <EtherInput
-              placeholder="Enter your bet amount in ETH or USD"
-              onChange={newValue => {
-                if (newValue) {
-                  setCreateChallengeValue(newValue);
-                } else {
-                  setCreateChallengeValue("");
-                }
-              }}
-              value={createChallengeValue}
-            />
-            <button className="btn btn-primary" onClick={createChallenge}>
-              Create challenge
-            </button>
+            {/* {matches && matches.length > 0 ? (
+              matches.map((match, index) => (
+                <div key={index}>
+                  <Text>Match: {match.team1}</Text>
+                  <Text>Team 1: {match.team1}</Text>
+                  <Text>Team 2: {match.team2}</Text>
+                  <Text>State: {match.state}</Text>
+                  <Text>Bet: {match.bet}</Text>
+                  <Text>Referee: {match.referee}</Text>
+                </div>
+              ))
+            ) : (
+              <Text>No matches available</Text>
+            )} */}
+
             <h2 className="mt-10 font-bold">Accept challenge</h2>
             <span className="text-sm">
               Amount bet in this match:{" "}
