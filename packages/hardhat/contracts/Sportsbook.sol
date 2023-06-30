@@ -35,6 +35,11 @@ contract Sportsbook {
         FINISHED
     }
 
+    enum UpdateRefereeState {
+        INACTIVE,
+        PENDING
+    }
+
     struct MatchChallenge {
         address team1;
         address team2;
@@ -46,7 +51,7 @@ contract Sportsbook {
     struct UpdateReferee {
         address proposingTeam;
         address newReferee;
-        bool accepted;
+        UpdateRefereeState state;
     }
 
     MatchChallenge[] public matchChallenges;
@@ -112,7 +117,9 @@ contract Sportsbook {
             "You're not any of the teams!"
         );
         require(matchChallenges[_challengeId].state < MatchState.STARTED, "Challenge has already been started!");
+        require(updateRefereeRequests[_challengeId].state == UpdateRefereeState.INACTIVE, "There's already a request!");
 
+        updateRefereeRequests[_challengeId].state = UpdateRefereeState.PENDING;
         updateRefereeRequests.push(UpdateReferee(msg.sender, _newReferee, false));
     }
 
@@ -120,6 +127,7 @@ contract Sportsbook {
         require(msg.sender != updateRefereeRequests[_challengeId].proposingTeam);
         require(updateRefereeRequests[_challengeId].accepted == false);
 
+        updateRefereeRequests[_challengeId].state = UpdateRefereeState.INACTIVE;
         if (_choice == true) {
             matchChallenges[_challengeId].referee = updateRefereeRequests[_challengeId].newReferee;
         }
@@ -159,6 +167,10 @@ contract Sportsbook {
         referee = matchChallenges[_id].referee;
     }
 
+    function viewMatchState(uint256 _id) public view returns (MatchState) {
+        return matchChallenges[_id].state;
+    }
+
     function viewMatchBet(uint256 _id) public view returns (uint256) {
         return matchChallenges[_id].bet;
     }
@@ -167,11 +179,17 @@ contract Sportsbook {
         return matchChallenges[_id].referee;
     }
 
-    function viewRequestedReferee(uint256 _id) public view returns (address) {
-        return updateRefereeRequests[_id].newReferee;
+    function viewUpdateRefereeRequest(uint256 _challengeId)
+        public
+        view
+        returns (address proposingTeam, address newReferee, UpdateRefereeState state)
+    {
+        proposingTeam = updateRefereeRequests[_challengeId].proposingTeam;
+        newReferee = updateRefereeRequests[_challengeId].newReferee;
+        accepted = updateRefereeRequests[_challengeId].state;
     }
 
-    function viewMatchState(uint256 _id) public view returns (MatchState) {
-        return matchChallenges[_id].state;
+    function viewRequestedReferee(uint256 _id) public view returns (address) {
+        return updateRefereeRequests[_id].newReferee;
     }
 }

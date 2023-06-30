@@ -1,6 +1,6 @@
 // import Link from "next/link";
 import { useState } from "react";
-// import { Switch } from "@chakra-ui/react";
+import { Switch } from "@chakra-ui/react";
 import { BigNumber, ethers } from "ethers";
 import type { NextPage } from "next";
 import { useAccount } from "wagmi";
@@ -24,7 +24,7 @@ const Home: NextPage = () => {
   const [updateRefereeId, setUpdateRefereeId] = useState<string>("");
   const [updateRefereeAddress, setUpdateRefereeAddress] = useState<string>("");
   const [answerUpdateRefereeId, setAnswerUpdateRefereeId] = useState<string>("");
-  // const [answerUpdateRefereeChoice, setAnswerUpdateRefereeChoice] = useState<boolean>(false);
+  const [answerUpdateRefereeChoice, setAnswerUpdateRefereeChoice] = useState<boolean>(false);
 
   const { data: viewMatchBet } = useScaffoldContractRead({
     contractName: "Sportsbook",
@@ -80,11 +80,11 @@ const Home: NextPage = () => {
     args: [updateRefereeId ? BigNumber.from(updateRefereeId) : undefined, updateRefereeAddress],
   });
 
-  // const { writeAsync: answerUpdateReferee } = useScaffoldContractWrite({
-  //   contractName: "Sportsbook",
-  //   functionName: "answerUpdateReferee",
-  //   args: [answerUpdateRefereeId ? BigNumber.from(answerUpdateRefereeId) : undefined, answerUpdateRefereeChoice],
-  // });
+  const { writeAsync: answerUpdateReferee } = useScaffoldContractWrite({
+    contractName: "Sportsbook",
+    functionName: "answerUpdateReferee",
+    args: [answerUpdateRefereeId ? BigNumber.from(answerUpdateRefereeId) : undefined, answerUpdateRefereeChoice],
+  });
 
   return (
     <>
@@ -254,15 +254,15 @@ const Home: NextPage = () => {
             />
             <span className="text-sm">Requested change to this referee: {viewRequestedReferee}</span>
             <span className="text-sm">Do you accept the new referee?: </span>
-            {/* <Switch
+            <Switch
               className="mb-2"
               id="answer-update-choice"
               checked={answerUpdateRefereeChoice}
               onChange={event => setAnswerUpdateRefereeChoice(event.target.checked)}
-            /> */}
-            {/* <button className="btn btn-primary" onClick={answerUpdateReferee}>
+            />
+            <button className="btn btn-primary" onClick={answerUpdateReferee}>
               Answer request
-            </button> */}
+            </button>
           </div>
         </div>
       </div>
