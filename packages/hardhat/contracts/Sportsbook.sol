@@ -63,6 +63,7 @@ contract Sportsbook {
     event ChallengeResult(
         uint256 indexed challengeId, address indexed team1, address indexed team2, uint8 team1Result, uint8 team2Result
     );
+    event ChallengeCanceled(uint256 indexed challengeId, address indexed canceledBy);
 
     constructor() payable {}
 
@@ -182,6 +183,7 @@ contract Sportsbook {
         }
         // Effect
         matchChallenges[_challengeId].state = MatchState.FINISHED;
+        emit ChallengeCanceled(_challengeId, msg.sender);
     }
 
     function viewMatchChallenge(uint256 _id)

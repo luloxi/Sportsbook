@@ -31,7 +31,7 @@ const CreateChallengeBox = ({}) => {
         <CardBody>
           <Heading size="xl">🏀 Challenge another team to a match! ⚽</Heading>
           <Text fontWeight={"bold"} marginBottom={0}>
-            Who do you want to challenge?
+            ⚔️ Who do you want to challenge? ⚔️
           </Text>
           <AddressInput
             placeholder="Enter address for team 2"
@@ -40,7 +40,7 @@ const CreateChallengeBox = ({}) => {
           />
           <br />
           <Text fontWeight={"bold"} marginBottom={0} marginTop={0}>
-            Propose a referee
+            🏁 Propose a referee 🏁
           </Text>
           <AddressInput
             placeholder="Enter address for referee"
@@ -49,7 +49,7 @@ const CreateChallengeBox = ({}) => {
           />
           <br />
           <Text fontWeight={"bold"} marginBottom={0} marginTop={0}>
-            (optional) Bet ETH on the match outcome{" "}
+            💰 (optional) Bet ETH on the match outcome 💰
           </Text>
           <EtherInput
             placeholder="Enter your bet amount in ETH or USD"

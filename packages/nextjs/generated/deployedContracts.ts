@@ -5,7 +5,7 @@ const contracts = {
       name: "localhost",
       contracts: {
         Sportsbook: {
-          address: "0x09635F643e140090A9A8Dcd712eD6285858ceBef",
+          address: "0x9E545E3C0baAB3E08CdfD552C960A1050f373042",
           abi: [
             {
               inputs: [],
@@ -41,6 +41,25 @@ const contracts = {
                 },
               ],
               name: "ChallengeAccepted",
+              type: "event",
+            },
+            {
+              anonymous: false,
+              inputs: [
+                {
+                  indexed: true,
+                  internalType: "uint256",
+                  name: "challengeId",
+                  type: "uint256",
+                },
+                {
+                  indexed: true,
+                  internalType: "address",
+                  name: "canceledBy",
+                  type: "address",
+                },
+              ],
+              name: "ChallengeCanceled",
               type: "event",
             },
             {
