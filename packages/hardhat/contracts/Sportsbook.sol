@@ -57,19 +57,32 @@ contract Sportsbook {
     MatchChallenge[] public matchChallenges;
     UpdateReferee[] public updateRefereeRequests;
 
-    event ChallengeResult(uint256 indexed MatchChallengeId, uint8 team1Result, uint8 team2Result);
+    event ChallengeCreated(uint256 indexed challengeId, address indexed team1, address indexed team2, uint256 bet);
+    event ChallengeAccepted(uint256 indexed challengeId, address indexed team1, address indexed team2, address referee);
+    event ChallengeStarted(uint256 indexed challengeId, address indexed referee, address team1, address team2);
+    event ChallengeResult(
+        uint256 indexed challengeId, address indexed team1, address indexed team2, uint8 team1Result, uint8 team2Result
+    );
 
     constructor() payable {}
 
     function createChallenge(address _team2, address referee) public payable {
         matchChallenges.push(MatchChallenge(msg.sender, _team2, MatchState.PENDING, msg.value, referee));
+        emit ChallengeCreated(matchChallenges.length - 1, msg.sender, _team2, msg.value);
     }
 
     function acceptChallenge(uint256 _challengeId) public payable {
         require(msg.sender == matchChallenges[_challengeId].team2, "You're not the challenged team!");
         require(msg.value >= matchChallenges[_challengeId].bet, "Haven't sent enough ETH!");
+        require(matchChallenges[_challengeId].state == MatchState.PENDING, "Challenge has already been accepted!");
 
         matchChallenges[_challengeId].state = MatchState.ACCEPTED;
+        emit ChallengeAccepted(
+            _challengeId,
+            matchChallenges[_challengeId].team1,
+            matchChallenges[_challengeId].team2,
+            matchChallenges[_challengeId].referee
+        );
     }
 
     function startChallenge(uint256 _challengeId) public {
@@ -80,6 +93,9 @@ contract Sportsbook {
 
         // Effect
         matchChallenges[_challengeId].state = MatchState.STARTED;
+        emit ChallengeStarted(
+            _challengeId, msg.sender, matchChallenges[_challengeId].team1, matchChallenges[_challengeId].team2
+        );
     }
 
     function completeChallenge(uint256 _challengeId, uint8 _team1Result, uint8 _team2Result) public {
@@ -89,7 +105,13 @@ contract Sportsbook {
         require(msg.sender == matchChallenges[_challengeId].referee, "You must be the referee to say who won");
         // Effect
         matchChallenges[_challengeId].state = MatchState.FINISHED;
-        emit ChallengeResult(_challengeId, _team1Result, _team2Result);
+        emit ChallengeResult(
+            _challengeId,
+            matchChallenges[_challengeId].team1,
+            matchChallenges[_challengeId].team1,
+            _team1Result,
+            _team2Result
+        );
         // Interact
         if (_team1Result > _team2Result) {
             (bool success,) =

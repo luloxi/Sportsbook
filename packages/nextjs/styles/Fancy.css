@@ -1,0 +1,4 @@
+.scrollable-card {
+  height: 300px; /* Set the desired height for the container */
+  overflow-y: auto; /* Enable vertical scrolling */
+}
