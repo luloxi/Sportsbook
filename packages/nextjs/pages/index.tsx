@@ -127,6 +127,7 @@ const Home: NextPage = () => {
             variant="solid"
             maxHeight={{ base: "container.sm", sm: "container.sm", md: "480" }}
             overflow={"auto"}
+            textColor={"white"}
             backgroundColor={"orange.800"}
           >
             <Stack>
@@ -157,7 +158,8 @@ const Home: NextPage = () => {
             direction={{ base: "column", sm: "row" }}
             maxWidth={"md"}
             overflow="hidden"
-            variant="outline"
+            variant="solid"
+            textColor={"white"}
             marginRight={4}
             backgroundColor={"green.600"}
             textAlign={"center"}

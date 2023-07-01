@@ -138,7 +138,11 @@ contract Sportsbook {
             msg.sender == matchChallenges[_challengeId].team1 || msg.sender == matchChallenges[_challengeId].team2,
             "You're not any of the teams!"
         );
-        require(matchChallenges[_challengeId].state < MatchState.STARTED, "Challenge has already been started!");
+        require(
+            matchChallenges[_challengeId].state == MatchState.PENDING
+                || matchChallenges[_challengeId].state == MatchState.ACCEPTED,
+            "Challenge has already been started!"
+        );
         require(updateRefereeRequests[_challengeId].state == UpdateRefereeState.INACTIVE, "There's already a request!");
 
         updateRefereeRequests[_challengeId] = UpdateReferee(msg.sender, _newReferee, UpdateRefereeState.PENDING);
