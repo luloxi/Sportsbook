@@ -89,6 +89,12 @@ const ShowChallengeCreated = ({ challenge, challengeId, team1, team2, bet }: MyC
     args: [challenge.challengeId ? BigNumber.from(challenge.challengeId) : undefined],
   });
 
+  const { data: viewMatchState } = useScaffoldContractRead({
+    contractName: "Sportsbook",
+    functionName: "viewMatchState",
+    args: [challenge.challengeId ? BigNumber.from(challenge.challengeId) : undefined],
+  });
+
   return (
     <div key={challengeId}>
       <Card
@@ -103,9 +109,19 @@ const ShowChallengeCreated = ({ challenge, challengeId, team1, team2, bet }: MyC
           <CardBody margin={0}>
             <Heading size={"md"}>Challenge ID: #{challenge.challengeId}</Heading>
             <Box className="flex items-center justify-center space-x-2" margin={0}>
-              <Address address={team1} />
-              <p>has challenged</p>
-              <Address address={team2} />
+              {viewMatchState == 3 ? (
+                <>
+                  <Address address={team2} />
+                  <p>was challenged by</p>
+                  <Address address={team1} />
+                </>
+              ) : (
+                <>
+                  <Address address={team1} />
+                  <p>has challenged</p>
+                  <Address address={team2} />
+                </>
+              )}
             </Box>
             <Text margin={0}>
               to a $SPORT match{" "}
@@ -115,67 +131,87 @@ const ShowChallengeCreated = ({ challenge, challengeId, team1, team2, bet }: MyC
             </Text>
 
             <Box className="flex items-center justify-center space-x-2">
-              <Address address={viewMatchReferee} />
-              <p>will be the referee for the match</p>
+              {viewMatchState == 3 ? (
+                <>
+                  <Address address={viewMatchReferee} />
+                  <p>was the referee and set the score for the match</p>
+                </>
+              ) : (
+                <>
+                  <Address address={viewMatchReferee} />
+                  <p>will be the referee for the match</p>
+                </>
+              )}
             </Box>
-            <Flex justifyContent={"space-around"}>
-              {address == team2 && (
-                <Button onClick={() => acceptChallenge()} backgroundColor={"green"} textColor={"white"}>
-                  Accept challenge <br />
-                  (Bet {bet.toString() ? parseFloat(ethers.utils.formatEther(bet.toString())).toFixed(4) : 0} ETH)
-                </Button>
-              )}
-              {(address == team1 || address == team2) && (
-                <Button onClick={() => deleteChallenge()} backgroundColor={"red"} textColor={"white"}>
-                  Delete and refund
-                </Button>
-              )}
-              {address == viewMatchReferee && (
-                <Button onClick={() => startChallenge()} backgroundColor={"blue"} textColor={"white"}>
-                  Start challenge
-                </Button>
-              )}
-            </Flex>
-            <br />
-            {address == viewMatchReferee && (
-              <Flex justifyContent={"space-evenly"} gap={3}>
-                <Input
-                  backgroundColor={"blue.900"}
-                  placeholder="Team 1 score"
-                  width={"30%"}
-                  value={completeChallengeTeam1Score}
-                  onChange={event => {
-                    const newValue = event.target.value;
-                    if (newValue) {
-                      setCompleteChallengeTeam1Score(newValue);
-                    } else {
-                      setCompleteChallengeTeam1Score("");
-                    }
-                  }}
-                />
+            {viewMatchState == 3 ? (
+              <></>
+            ) : (
+              <>
+                <Flex justifyContent={"space-around"}>
+                  {address == team2 && viewMatchState !== undefined && viewMatchState < 1 && (
+                    <Button onClick={() => acceptChallenge()} backgroundColor={"green"} textColor={"white"}>
+                      Accept challenge <br />
+                      (Bet {bet.toString() ? parseFloat(ethers.utils.formatEther(bet.toString())).toFixed(4) : 0} ETH)
+                    </Button>
+                  )}
+                  {(address == team1 || address == team2) && viewMatchState !== undefined && viewMatchState < 2 && (
+                    <Button onClick={() => deleteChallenge()} backgroundColor={"red"} textColor={"white"}>
+                      Delete and refund
+                    </Button>
+                  )}
+                  {address == viewMatchReferee && viewMatchState !== undefined && viewMatchState < 2 && (
+                    <Button onClick={() => startChallenge()} backgroundColor={"blue"} textColor={"white"}>
+                      Start challenge
+                    </Button>
+                  )}
+                </Flex>
+                <br />
+                {address == viewMatchReferee && (
+                  <Flex justifyContent={"space-evenly"} gap={3}>
+                    <Input
+                      backgroundColor={"blue.900"}
+                      placeholder="Team 1 score"
+                      width={"30%"}
+                      value={completeChallengeTeam1Score}
+                      onChange={event => {
+                        const newValue = event.target.value;
+                        if (newValue) {
+                          setCompleteChallengeTeam1Score(newValue);
+                        } else {
+                          setCompleteChallengeTeam1Score("");
+                        }
+                      }}
+                    />
 
-                <Input
-                  backgroundColor={"blue.900"}
-                  width={"30%"}
-                  placeholder="Team 2 score"
-                  value={completeChallengeTeam2Score}
-                  onChange={event => {
-                    const newValue = event.target.value;
-                    if (newValue) {
-                      setCompleteChallengeTeam2Score(newValue);
-                    } else {
-                      setCompleteChallengeTeam2Score("");
-                    }
-                  }}
-                />
-                <Button onClick={() => completeChallenge()} backgroundColor={"blue"} width={"20%"} textColor={"white"}>
-                  Set score
-                </Button>
-              </Flex>
+                    <Input
+                      backgroundColor={"blue.900"}
+                      width={"30%"}
+                      placeholder="Team 2 score"
+                      value={completeChallengeTeam2Score}
+                      onChange={event => {
+                        const newValue = event.target.value;
+                        if (newValue) {
+                          setCompleteChallengeTeam2Score(newValue);
+                        } else {
+                          setCompleteChallengeTeam2Score("");
+                        }
+                      }}
+                    />
+                    <Button
+                      onClick={() => completeChallenge()}
+                      backgroundColor={"blue"}
+                      width={"20%"}
+                      textColor={"white"}
+                    >
+                      Set score
+                    </Button>
+                  </Flex>
+                )}
+              </>
             )}
             {/* Here comes the accordion! */}
             <Accordion marginTop={4} backgroundColor={"orange.700"} textColor={"white"}>
-              {(address == team1 || address == team2) && (
+              {(address == team1 || address == team2) && viewMatchState !== undefined && viewMatchState < 2 && (
                 <AccordionItem>
                   <h2>
                     <AccordionButton backgroundColor={viewUpdateRefereeState == 1 ? "blue.600" : "orange.800"}>
