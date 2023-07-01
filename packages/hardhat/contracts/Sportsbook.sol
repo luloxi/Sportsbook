@@ -163,9 +163,7 @@ contract Sportsbook {
             "You're not any of the teams nor the referee!"
         );
 
-        // Effect
-        matchChallenges[_challengeId].state = MatchState.FINISHED;
-        // Interact
+        // Interact (reentrancy vulnerable, apply reentrancy guard)
         (bool success,) =
             payable(matchChallenges[_challengeId].team1).call{value: matchChallenges[_challengeId].bet}("");
         require(success, "Sportsbook: Transfer to team1 failed.");
@@ -174,6 +172,8 @@ contract Sportsbook {
                 payable(matchChallenges[_challengeId].team2).call{value: matchChallenges[_challengeId].bet}("");
             require(success2, "Sportsbook: Transfer to team2 failed.");
         }
+        // Effect
+        matchChallenges[_challengeId].state = MatchState.FINISHED;
     }
 
     function viewMatchChallenge(uint256 _id)
@@ -216,5 +216,9 @@ contract Sportsbook {
 
     function viewRequestedReferee(uint256 _id) public view returns (address) {
         return updateRefereeRequests[_id].newReferee;
+    }
+
+    function viewUpdateRefereeState(uint256 _id) public view returns (UpdateRefereeState) {
+        return updateRefereeRequests[_id].state;
     }
 }

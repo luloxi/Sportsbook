@@ -1,15 +1,14 @@
 // import Link from "next/link";
+// import { useAccount } from "wagmi";
 import { useState } from "react";
 import { useEffect } from "react";
 import { Switch } from "@chakra-ui/react";
-import { Box, Button, Card, CardBody, CardFooter, Heading, Stack, Text } from "@chakra-ui/react";
+import { Button, Card, CardBody, CardFooter, Flex, Heading, Stack, Text } from "@chakra-ui/react";
 import { BigNumber } from "ethers";
 import type { NextPage } from "next";
-import { useAccount } from "wagmi";
 import { MetaHeader } from "~~/components/MetaHeader";
-import { Address, AddressInput, EtherInput, IntegerInput } from "~~/components/scaffold-eth";
+import { AddressInput, EtherInput, IntegerInput } from "~~/components/scaffold-eth";
 import {
-  // useDeployedContractInfo,
   useScaffoldContractRead,
   useScaffoldContractWrite,
   useScaffoldEventHistory,
@@ -19,7 +18,7 @@ import ShowChallengeCreated from "~~/pages/sportsbook/ShowChallengeCreated";
 import { ChallengeCreatedProps } from "~~/types/SportsbookTypes";
 
 const Home: NextPage = () => {
-  const { address } = useAccount();
+  // const { address } = useAccount();
   // const { data: sportsbookInfo } = useDeployedContractInfo("Sportsbook");
 
   const [challengeCreated, setChallengeCreated] = useState<ChallengeCreatedProps[]>([]);
@@ -120,28 +119,32 @@ const Home: NextPage = () => {
     <>
       <MetaHeader />
       <>
-        <div className="flex flex-col md:flex-row items-center justify-between flex-grow pt-10 text-center mb-8">
+        <Flex direction={{ base: "column", md: "row" }} justify="space-around" align="center" marginTop={4}>
           <Card
             direction={{ base: "column", sm: "row" }}
-            width="container.md"
+            width="container.sm"
             maxWidth={{ base: "container.sm", sm: "container.sm", md: "container.md" }}
-            variant="outline"
-            className="md:ml-4 scrollable-card"
+            variant="solid"
+            maxHeight={{ base: "container.sm", sm: "container.sm", md: "480" }}
+            overflow={"auto"}
+            backgroundColor={"orange.800"}
           >
             <Stack>
               <CardBody>
-                <Heading size="md">🏀 See your active challenges! ⚽</Heading>
-                {challengeCreated?.map((challenge, index) => (
-                  <div key={challenge.challengeId}>
-                    <ShowChallengeCreated
-                      challenge={challenge}
-                      challengeId={index}
-                      team1={challenge.team1}
-                      team2={challenge.team2}
-                      bet={challenge.bet}
-                    />
-                  </div>
-                ))}
+                <Heading size="xl">🏀 See your active challenges! ⚽</Heading>
+                <Flex direction="column" alignItems="center" justifyContent="center">
+                  {challengeCreated?.map((challenge, index) => (
+                    <div key={index}>
+                      <ShowChallengeCreated
+                        challenge={challenge}
+                        challengeId={index}
+                        team1={challenge.team1}
+                        team2={challenge.team2}
+                        bet={challenge.bet}
+                      />
+                    </div>
+                  ))}
+                </Flex>
               </CardBody>
               <CardFooter>
                 {/* <Button variant="solid" onClick={createChallenge} colorScheme="blue">
@@ -155,38 +158,32 @@ const Home: NextPage = () => {
             maxWidth={"md"}
             overflow="hidden"
             variant="outline"
-            className="md:ml-4"
+            marginRight={4}
+            backgroundColor={"green.600"}
+            textAlign={"center"}
           >
             <Stack>
               <CardBody>
                 <Heading size="xl">🏀 Challenge another team to a match! ⚽</Heading>
                 <Text fontWeight={"bold"} marginBottom={0}>
-                  Enter address of who you want to challenge
+                  Who do you want to challenge?
                 </Text>
                 <AddressInput
                   placeholder="Enter address for team 2"
                   onChange={setCreateChallengeTeam2Address}
                   value={createChallengeTeam2Address ?? ""}
                 />
-                <Box className="flex items-center justify-center space-x-2">
-                  <h2 className="mt-2">Propose yourself to try it out</h2>
-                  <Address address={address} />
-                </Box>
                 <br />
-                <Text fontWeight={"bold"} marginBottom={0}>
-                  Propose a referee to input the result of the match
+                <Text fontWeight={"bold"} marginBottom={0} marginTop={0}>
+                  Propose a referee
                 </Text>
                 <AddressInput
                   placeholder="Enter address for referee"
                   onChange={setCreateChallengeRefereeAddress}
                   value={createChallengeRefereeAddress ?? ""}
                 />
-                <Box className="flex items-center justify-center">
-                  <h2 className="mt-2">Set yourself as referee to try out Sportsbook</h2>
-                  <Address address={address} />
-                </Box>
                 <br />
-                <Text fontWeight={"bold"} marginBottom={0}>
+                <Text fontWeight={"bold"} marginBottom={0} marginTop={0}>
                   (optional) Bet ETH on the match outcome{" "}
                 </Text>
                 <EtherInput
@@ -200,75 +197,30 @@ const Home: NextPage = () => {
                   }}
                   value={createChallengeValue}
                 />
-                your oponent will have to pay the same to accept.
+                Your oponent will have to pay the same to accept.
                 <br />
-                <Text fontWeight={"bold"} mt={0}>
+                <Text fontWeight={"bold"} mt={0} mb={0}>
                   Winner gets all, Tie gives back the ETH.
                 </Text>
-              </CardBody>
-
-              <CardFooter>
-                <Button variant="solid" onClick={createChallenge} colorScheme="blue">
+                <Button
+                  variant="solid"
+                  onClick={createChallenge}
+                  backgroundColor={"orange.500"}
+                  textColor={"white"}
+                  colorScheme="orange"
+                  marginTop={4}
+                >
                   Create challenge
                 </Button>
-              </CardFooter>
+              </CardBody>
             </Stack>
           </Card>
-        </div>
+        </Flex>
       </>
 
       <div className="flex items-center flex-col flex-grow pt-10 text-center mb-8">
         <div className="px-5">
           <div className="flex flex-col items-center justify-center w-full flex-grow">
-            <h2 className="mt-2 font-bold">Create challenge</h2>
-            {/* {matches && matches.length > 0 ? (
-              matches.map((match, index) => (
-                <div key={index}>
-                  <Text>Match: {match.team1}</Text>
-                  <Text>Team 1: {match.team1}</Text>
-                  <Text>Team 2: {match.team2}</Text>
-                  <Text>State: {match.state}</Text>
-                  <Text>Bet: {match.bet}</Text>
-                  <Text>Referee: {match.referee}</Text>
-                </div>
-              ))
-            ) : (
-              <Text>No matches available</Text>
-            )} */}
-
-            {/* <h2 className="mt-10 font-bold">Accept challenge</h2>
-            <span className="text-sm">
-              Amount bet in this match:{" "}
-              {viewMatchBet ? parseFloat(ethers.utils.formatEther(viewMatchBet)).toFixed(4) : 0} ETH
-            </span>
-            <IntegerInput
-              placeholder="Enter challenge ID"
-              value={acceptChallengeId}
-              onChange={newValue => {
-                if (newValue) {
-                  setAcceptChallengeId(newValue.toString());
-                } else {
-                  setAcceptChallengeId("");
-                }
-              }}
-            />
-            <EtherInput
-              placeholder="Enter same bet amount for this match"
-              onChange={newValue => {
-                if (newValue) {
-                  setAcceptChallengeValue(newValue);
-                } else {
-                  setAcceptChallengeValue("");
-                }
-              }}
-              value={acceptChallengeValue}
-            />
-            <button className="btn btn-primary" onClick={acceptChallenge}>
-              Accept challenge
-            </button>
-            <button className="btn btn-primary" onClick={deleteChallenge}>
-              Cancel challenge
-            </button> */}
             <h2 className="mt-10 font-bold">Start challenge</h2>
             <span className="text-sm">Exists?: </span>
             <span className="text-sm">Has started?: </span>

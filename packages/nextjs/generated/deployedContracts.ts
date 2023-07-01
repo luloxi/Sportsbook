@@ -5,7 +5,7 @@ const contracts = {
       name: "localhost",
       contracts: {
         Sportsbook: {
-          address: "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          address: "0x959922bE3CAee4b8Cd9a407cc3ac1C251C2007B1",
           abi: [
             {
               inputs: [],
@@ -477,6 +477,25 @@ const contracts = {
                 {
                   internalType: "enum Sportsbook.UpdateRefereeState",
                   name: "state",
+                  type: "uint8",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "uint256",
+                  name: "_id",
+                  type: "uint256",
+                },
+              ],
+              name: "viewUpdateRefereeState",
+              outputs: [
+                {
+                  internalType: "enum Sportsbook.UpdateRefereeState",
+                  name: "",
                   type: "uint8",
                 },
               ],
