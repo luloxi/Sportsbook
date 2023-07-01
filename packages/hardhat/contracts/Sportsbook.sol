@@ -55,7 +55,7 @@ contract Sportsbook {
     }
 
     MatchChallenge[] public matchChallenges;
-    UpdateReferee[] public updateRefereeRequests;
+    mapping(uint256 => UpdateReferee) public updateRefereeRequests;
 
     event ChallengeCreated(uint256 indexed challengeId, address indexed team1, address indexed team2, uint256 bet);
     event ChallengeAccepted(uint256 indexed challengeId, address indexed team1, address indexed team2, address referee);
@@ -149,7 +149,11 @@ contract Sportsbook {
     }
 
     function answerUpdateReferee(uint256 _challengeId, bool _choice) public {
-        require(msg.sender != updateRefereeRequests[_challengeId].proposingTeam);
+        require(
+            (msg.sender == matchChallenges[_challengeId].team1 || msg.sender == matchChallenges[_challengeId].team2),
+            "You're not any of the teams!"
+        );
+        require(msg.sender != updateRefereeRequests[_challengeId].proposingTeam, "You're the proposing team!");
         require(updateRefereeRequests[_challengeId].state == UpdateRefereeState.PENDING, "There's no request!");
 
         updateRefereeRequests[_challengeId].state = UpdateRefereeState.INACTIVE;
@@ -224,5 +228,9 @@ contract Sportsbook {
 
     function viewUpdateRefereeState(uint256 _id) public view returns (UpdateRefereeState) {
         return updateRefereeRequests[_id].state;
+    }
+
+    function viewUpdateRefereeProposingTeam(uint256 _id) public view returns (address) {
+        return updateRefereeRequests[_id].proposingTeam;
     }
 }

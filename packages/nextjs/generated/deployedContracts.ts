@@ -5,7 +5,7 @@ const contracts = {
       name: "localhost",
       contracts: {
         Sportsbook: {
-          address: "0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f",
+          address: "0x09635F643e140090A9A8Dcd712eD6285858ceBef",
           abi: [
             {
               inputs: [],
@@ -444,6 +444,25 @@ const contracts = {
                 },
               ],
               name: "viewRequestedReferee",
+              outputs: [
+                {
+                  internalType: "address",
+                  name: "",
+                  type: "address",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "uint256",
+                  name: "_id",
+                  type: "uint256",
+                },
+              ],
+              name: "viewUpdateRefereeProposingTeam",
               outputs: [
                 {
                   internalType: "address",
