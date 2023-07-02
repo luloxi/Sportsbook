@@ -54,18 +54,18 @@ const Home: NextPage = () => {
 
   useEffect(() => {
     setChallengeCanceled(
-      ChallengeCanceled?.map(event => {
+      (ChallengeCanceled?.map(event => {
         return {
           challengeId: event.args[0].toString(),
           canceledBy: event.args[1].toString(),
         } as ChallengeCanceledProps;
-      }) as ChallengeCanceledProps[],
+      }) as ChallengeCanceledProps[]) || [],
     );
   }, [ChallengeCanceled]);
 
   useEffect(() => {
     setChallengeResults(
-      ChallengeResult?.map(event => {
+      (ChallengeResult?.map(event => {
         return {
           challengeId: event.args[0].toString(),
           team1: event.args[1],
@@ -73,7 +73,7 @@ const Home: NextPage = () => {
           team1Result: event.args[3],
           team2Result: event.args[4],
         } as ChallengeResultProps;
-      }) as ChallengeResultProps[],
+      }) as ChallengeResultProps[]) || [],
     );
   }, [ChallengeResult]);
 
@@ -191,9 +191,9 @@ const Home: NextPage = () => {
                       return (
                         <ShowChallengeCreated
                           key={challenge.challengeId}
-                          challenge={[challenge]}
-                          challengeCanceled={matchingChallengeCanceled ? [matchingChallengeCanceled] : []}
-                          challengeResult={matchingChallengeResult ? [matchingChallengeResult] : []}
+                          challenge={challenge}
+                          challengeCanceled={matchingChallengeCanceled ? matchingChallengeCanceled : undefined} // Pass the matching object directly, or undefined if not found
+                          challengeResult={matchingChallengeResult ? matchingChallengeResult : undefined} // Pass the matching object directly, or undefined if not found
                         />
                       );
                     })}

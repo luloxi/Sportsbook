@@ -15,32 +15,31 @@ const ShowChallengeCreated = ({ challenge, challengeCanceled, challengeResult }:
   const [completeChallengeTeam2Score, setCompleteChallengeTeam2Score] = useState<string>("");
 
   const { address } = useAccount();
-  const match = challenge[0];
 
   const { writeAsync: acceptChallenge } = useScaffoldContractWrite({
     contractName: "Sportsbook",
     functionName: "acceptChallenge",
-    args: [match.challengeId ? BigNumber.from(match.challengeId) : BigNumber.from(0)],
-    value: match.bet ? ethers.utils.formatEther(match.bet.toString()) : undefined,
+    args: [challenge.challengeId ? BigNumber.from(challenge.challengeId) : BigNumber.from(0)],
+    value: challenge.bet ? ethers.utils.formatEther(challenge.bet.toString()) : undefined,
   });
 
   const { writeAsync: deleteChallenge } = useScaffoldContractWrite({
     contractName: "Sportsbook",
     functionName: "deleteChallenge",
-    args: [match.challengeId ? BigNumber.from(match.challengeId) : BigNumber.from(0)],
+    args: [challenge.challengeId ? BigNumber.from(challenge.challengeId) : BigNumber.from(0)],
   });
 
   const { writeAsync: startChallenge } = useScaffoldContractWrite({
     contractName: "Sportsbook",
     functionName: "startChallenge",
-    args: [match.challengeId ? BigNumber.from(match.challengeId) : undefined],
+    args: [challenge.challengeId ? BigNumber.from(challenge.challengeId) : undefined],
   });
 
   const { writeAsync: completeChallenge } = useScaffoldContractWrite({
     contractName: "Sportsbook",
     functionName: "completeChallenge",
     args: [
-      match.challengeId ? BigNumber.from(match.challengeId) : undefined,
+      challenge.challengeId ? BigNumber.from(challenge.challengeId) : undefined,
       completeChallengeTeam1Score ? parseInt(completeChallengeTeam1Score) : undefined,
       completeChallengeTeam2Score ? parseInt(completeChallengeTeam2Score) : undefined,
     ],
@@ -49,53 +48,53 @@ const ShowChallengeCreated = ({ challenge, challengeCanceled, challengeResult }:
   const { writeAsync: updateReferee } = useScaffoldContractWrite({
     contractName: "Sportsbook",
     functionName: "updateReferee",
-    args: [match.challengeId ? BigNumber.from(match.challengeId) : BigNumber.from(0), updateRefereeAddress],
+    args: [challenge.challengeId ? BigNumber.from(challenge.challengeId) : BigNumber.from(0), updateRefereeAddress],
   });
 
   const { writeAsync: answerNoToUpdateReferee } = useScaffoldContractWrite({
     contractName: "Sportsbook",
     functionName: "answerUpdateReferee",
-    args: [match.challengeId ? BigNumber.from(match.challengeId) : undefined, false],
+    args: [challenge.challengeId ? BigNumber.from(challenge.challengeId) : undefined, false],
   });
 
   const { writeAsync: answerYesToUpdateReferee } = useScaffoldContractWrite({
     contractName: "Sportsbook",
     functionName: "answerUpdateReferee",
-    args: [match.challengeId ? BigNumber.from(match.challengeId) : undefined, true],
+    args: [challenge.challengeId ? BigNumber.from(challenge.challengeId) : undefined, true],
   });
 
   const { data: viewMatchReferee } = useScaffoldContractRead({
     contractName: "Sportsbook",
     functionName: "viewMatchReferee",
-    args: [match.challengeId ? BigNumber.from(match.challengeId) : undefined],
+    args: [challenge.challengeId ? BigNumber.from(challenge.challengeId) : undefined],
   });
 
   const { data: viewUpdateRefereeState } = useScaffoldContractRead({
     contractName: "Sportsbook",
     functionName: "viewUpdateRefereeState",
-    args: [match.challengeId ? BigNumber.from(match.challengeId) : undefined],
+    args: [challenge.challengeId ? BigNumber.from(challenge.challengeId) : undefined],
   });
 
   const { data: viewRequestedReferee } = useScaffoldContractRead({
     contractName: "Sportsbook",
     functionName: "viewRequestedReferee",
-    args: [match.challengeId ? BigNumber.from(match.challengeId) : undefined],
+    args: [challenge.challengeId ? BigNumber.from(challenge.challengeId) : undefined],
   });
 
   const { data: viewUpdateRefereeProposingTeam } = useScaffoldContractRead({
     contractName: "Sportsbook",
     functionName: "viewUpdateRefereeProposingTeam",
-    args: [match.challengeId ? BigNumber.from(match.challengeId) : undefined],
+    args: [challenge.challengeId ? BigNumber.from(challenge.challengeId) : undefined],
   });
 
   const { data: viewMatchState } = useScaffoldContractRead({
     contractName: "Sportsbook",
     functionName: "viewMatchState",
-    args: [match.challengeId ? BigNumber.from(match.challengeId) : undefined],
+    args: [challenge.challengeId ? BigNumber.from(challenge.challengeId) : undefined],
   });
 
   return (
-    <div key={match.challengeId}>
+    <div key={challenge.challengeId}>
       <Card
         size={"md"}
         width={"xl"}
@@ -106,39 +105,39 @@ const ShowChallengeCreated = ({ challenge, challengeCanceled, challengeResult }:
       >
         <Stack>
           <CardBody margin={0}>
-            <Heading size={"md"}>Challenge ID: #{match.challengeId}</Heading>
+            <Heading size={"md"}>Challenge ID: #{challenge.challengeId}</Heading>
             {viewMatchState == 3 ? (
               <>
-                {challengeResult && challengeResult.length > 0 && (
+                {challengeResult && (
                   <>
                     <Flex justifyContent={"space-around"} marginBottom={0}>
                       <Box className="flex items-center justify-center space-x-2" margin={0}>
-                        <Address address={match.team1} />
-                        <Text> scored: {challengeResult[0].team1Result}</Text>
+                        <Address address={challenge.team1} />
+                        <Text> scored: {challengeResult.team1Result}</Text>
                       </Box>
                       <Box className="flex items-center justify-center space-x-2" margin={0}>
-                        <Address address={match.team2} />
-                        <Text> scored: {challengeResult[0].team2Result}</Text>
+                        <Address address={challenge.team2} />
+                        <Text> scored: {challengeResult.team2Result}</Text>
                       </Box>
                     </Flex>
-                    {challengeResult[0].team1Result > challengeResult[0].team2Result ? (
+                    {challengeResult.team1Result > challengeResult.team2Result ? (
                       <>
                         <Text fontWeight={"bold"} fontSize={"xl"} marginBottom={0} marginTop={0}>
                           Team 1 won!
                         </Text>
                         <Text fontSize={"md"} marginTop={0}>
-                          The {parseFloat(ethers.utils.formatEther((match.bet * 2).toString())).toFixed(4)} ETH prize is
-                          theirs!
+                          The {parseFloat(ethers.utils.formatEther((challenge.bet * 2).toString())).toFixed(4)} ETH
+                          prize is theirs!
                         </Text>
                       </>
-                    ) : challengeResult[0].team1Result < challengeResult[0].team2Result ? (
+                    ) : challengeResult.team1Result < challengeResult.team2Result ? (
                       <>
                         <Text fontWeight={"bold"} fontSize={"xl"} marginBottom={0}>
                           Team 2 won!
                         </Text>
                         <Text fontSize={"md"} marginTop={0}>
-                          The {parseFloat(ethers.utils.formatEther((match.bet * 2).toString())).toFixed(4)} ETH prize is
-                          theirs!
+                          The {parseFloat(ethers.utils.formatEther((challenge.bet * 2).toString())).toFixed(4)} ETH
+                          prize is theirs!
                         </Text>
                       </>
                     ) : (
@@ -147,7 +146,7 @@ const ShowChallengeCreated = ({ challenge, challengeCanceled, challengeResult }:
                           It&apos;s a tie!
                         </Text>
                         <Text fontSize={"md"} marginTop={0}>
-                          {parseFloat(ethers.utils.formatEther(match.bet.toString())).toFixed(4)} ETH minus fees was
+                          {parseFloat(ethers.utils.formatEther(challenge.bet.toString())).toFixed(4)} ETH minus fees was
                           returned to each team.
                         </Text>
                       </>
@@ -155,32 +154,40 @@ const ShowChallengeCreated = ({ challenge, challengeCanceled, challengeResult }:
                   </>
                 )}
 
-                {challengeCanceled && challengeCanceled.length > 0 && (
+                {challengeCanceled && (
                   <Box className="flex items-center justify-center space-x-2" margin={0}>
                     <Text>Match was canceled by </Text>
-                    <Address address={challengeCanceled[0].canceledBy} />
+                    <Address address={challengeCanceled.canceledBy} />
                   </Box>
                 )}
               </>
             ) : (
               <>
                 <Box className="flex items-center justify-center space-x-2" margin={0}>
-                  <Address address={match.team1} />
+                  <Address address={challenge.team1} />
                   <p>has challenged</p>
-                  <Address address={match.team2} />
+                  <Address address={challenge.team2} />
                 </Box>
                 <Text margin={0}>
                   to a $SPORT match{" "}
                   <strong>
                     betting{" "}
-                    {match.bet.toString() ? parseFloat(ethers.utils.formatEther(match.bet.toString())).toFixed(4) : 0}{" "}
+                    {challenge.bet.toString()
+                      ? parseFloat(ethers.utils.formatEther(challenge.bet.toString())).toFixed(4)
+                      : 0}{" "}
                     ETH each
                   </strong>
                 </Text>
-                <Box className="flex items-center justify-center space-x-2">
-                  <Address address={viewMatchReferee} />
-                  <p>will be the referee for the match</p>
-                </Box>
+                {viewMatchReferee ? (
+                  <Box className="flex items-center justify-center space-x-2">
+                    <Address address={viewMatchReferee} />
+                    <p>will be the referee for the match</p>
+                  </Box>
+                ) : (
+                  <p>
+                    <strong>Error loading referee, please refresh the page</strong>
+                  </p>
+                )}
               </>
             )}
 
@@ -188,17 +195,17 @@ const ShowChallengeCreated = ({ challenge, challengeCanceled, challengeResult }:
             {viewMatchState != 3 ? (
               <>
                 <Flex justifyContent={"space-around"} marginBottom={0}>
-                  {address == match.team2 && viewMatchState !== undefined && viewMatchState < 1 && (
+                  {address == challenge.team2 && viewMatchState !== undefined && viewMatchState < 1 && (
                     <Button onClick={() => acceptChallenge()} backgroundColor={"green"} textColor={"white"}>
                       Accept challenge <br />
                       (Bet{" "}
-                      {match.bet.toString()
-                        ? parseFloat(ethers.utils.formatEther(match.bet.toString())).toFixed(4)
+                      {challenge.bet.toString()
+                        ? parseFloat(ethers.utils.formatEther(challenge.bet.toString())).toFixed(4)
                         : 0}{" "}
                       ETH)
                     </Button>
                   )}
-                  {(address == match.team1 || address == match.team2) &&
+                  {(address == challenge.team1 || address == challenge.team2) &&
                     viewMatchState !== undefined &&
                     viewMatchState < 2 && (
                       <Button onClick={() => deleteChallenge()} backgroundColor={"red"} textColor={"white"}>
@@ -258,7 +265,7 @@ const ShowChallengeCreated = ({ challenge, challengeCanceled, challengeResult }:
             )}
             {/* Here comes the accordion! */}
             <Accordion marginTop={4} backgroundColor={"orange.700"} textColor={"white"}>
-              {(address == match.team1 || address == match.team2) &&
+              {(address == challenge.team1 || address == challenge.team2) &&
                 viewMatchState !== undefined &&
                 viewMatchState < 2 && (
                   <AccordionItem>
@@ -329,28 +336,31 @@ const ShowChallengeCreated = ({ challenge, challengeCanceled, challengeResult }:
                     <AccordionIcon />
                   </AccordionButton>
                 </h2>
-                <AccordionPanel pb={4}>
+                <AccordionPanel pb={4} pt={0}>
                   {viewMatchState == 3 ? (
                     <>
-                      <Box className="flex items-center justify-center space-x-2" margin={0}>
-                        <Address address={match.team2} />
+                      <Box marginTop={0} className="flex items-center justify-center space-x-2" margin={0}>
+                        <Address address={challenge.team2} />
                         <p>was challenged by</p>
-                        <Address address={match.team1} />
+                        <Address address={challenge.team1} />
                       </Box>
                       <Text margin={0}>
                         to a $SPORT match{" "}
                         <strong>
                           betting{" "}
-                          {match.bet.toString()
-                            ? parseFloat(ethers.utils.formatEther(match.bet.toString())).toFixed(4)
+                          {challenge.bet.toString()
+                            ? parseFloat(ethers.utils.formatEther(challenge.bet.toString())).toFixed(4)
                             : 0}{" "}
                           ETH each
                         </strong>
                       </Text>
-                      <Box className="flex items-center justify-center space-x-2">
-                        <Address address={viewMatchReferee} />
-                        <p>was the referee and set the score</p>
-                      </Box>
+
+                      {!challengeCanceled && (
+                        <Box className="flex items-center justify-center space-x-2">
+                          <Address address={viewMatchReferee} />
+                          <p>was the referee and set the score</p>
+                        </Box>
+                      )}
                     </>
                   ) : (
                     <>

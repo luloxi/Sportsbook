@@ -20,7 +20,7 @@ export type ChallengeCanceledProps = {
 };
 
 export type MyChallengeCreatedProps = {
-  challenge: ChallengeCreatedProps[];
-  challengeCanceled: ChallengeCanceledProps[]; // Added the challengeCanceled prop
-  challengeResult: ChallengeResultProps[]; // Added the challengeResult prop
+  challenge: ChallengeCreatedProps;
+  challengeCanceled?: ChallengeCanceledProps; // Added the challengeCanceled prop
+  challengeResult?: ChallengeResultProps; // Added the challengeResult prop
 };
