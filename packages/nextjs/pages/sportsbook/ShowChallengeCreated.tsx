@@ -185,7 +185,7 @@ const ShowChallengeCreated = ({ challenge, challengeCanceled, challengeResult }:
                   </Box>
                 ) : (
                   <p>
-                    <strong>Error loading referee, please refresh the page</strong>
+                    <strong>Refresh the page if this message doesn&apos;t go away</strong>
                   </p>
                 )}
               </>
@@ -263,7 +263,7 @@ const ShowChallengeCreated = ({ challenge, challengeCanceled, challengeResult }:
             ) : (
               <></>
             )}
-            {/* Here comes the accordion! */}
+            {/* Update referee and about this match */}
             <Accordion marginTop={4} backgroundColor={"orange.700"} textColor={"white"}>
               {(address == challenge.team1 || address == challenge.team2) &&
                 viewMatchState !== undefined &&
