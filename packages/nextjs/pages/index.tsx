@@ -59,7 +59,7 @@ const Home: NextPage = () => {
           challengeId: event.args[0].toString(),
           canceledBy: event.args[1].toString(),
         } as ChallengeCanceledProps;
-      }).filter(Boolean) as ChallengeCanceledProps[],
+      }) as ChallengeCanceledProps[],
     );
   }, [ChallengeCanceled]);
 
@@ -73,7 +73,7 @@ const Home: NextPage = () => {
           team1Result: event.args[3],
           team2Result: event.args[4],
         } as ChallengeResultProps;
-      }).filter(Boolean) as ChallengeResultProps[],
+      }) as ChallengeResultProps[],
     );
   }, [ChallengeResult]);
 
@@ -92,7 +92,7 @@ const Home: NextPage = () => {
           team2: team2,
           bet: parseInt(bet.toString()),
         } as ChallengeCreatedProps;
-        return [...prev, newChallenge];
+        return [newChallenge, ...prev]; // Prepend the new event to the array
       });
     },
   });

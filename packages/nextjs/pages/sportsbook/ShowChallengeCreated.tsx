@@ -15,7 +15,6 @@ const ShowChallengeCreated = ({ challenge, challengeCanceled, challengeResult }:
   const [completeChallengeTeam2Score, setCompleteChallengeTeam2Score] = useState<string>("");
 
   const { address } = useAccount();
-
   const match = challenge[0];
 
   const { writeAsync: acceptChallenge } = useScaffoldContractWrite({
