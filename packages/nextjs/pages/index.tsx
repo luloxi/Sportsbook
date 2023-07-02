@@ -9,17 +9,32 @@ import { Card, CardBody, Flex, Heading, Stack } from "@chakra-ui/react";
 import type { NextPage } from "next";
 import { MetaHeader } from "~~/components/MetaHeader";
 import { useScaffoldEventHistory, useScaffoldEventSubscriber } from "~~/hooks/scaffold-eth";
-import { ChallengeCreatedProps } from "~~/types/SportsbookTypes";
+import { ChallengeCanceledProps, ChallengeCreatedProps, ChallengeResultProps } from "~~/types/SportsbookTypes";
 
 const Home: NextPage = () => {
   // const { address } = useAccount();
-  // const { data: sportsbookInfo } = useDeployedContractInfo("Sportsbook");
 
   const [challengeCreated, setChallengeCreated] = useState<ChallengeCreatedProps[]>([]);
+  const [challengeResults, setChallengeResults] = useState<ChallengeResultProps[]>([]);
+  const [challengeCanceled, setChallengeCanceled] = useState<ChallengeCanceledProps[]>([]);
 
   const { data: ChallengeCreated } = useScaffoldEventHistory({
     contractName: "Sportsbook",
     eventName: "ChallengeCreated",
+    fromBlock: Number(process.env.NEXT_PUBLIC_DEPLOY_BLOCK) || 0,
+    blockData: false,
+  });
+
+  const { data: ChallengeCanceled } = useScaffoldEventHistory({
+    contractName: "Sportsbook",
+    eventName: "ChallengeCanceled",
+    fromBlock: Number(process.env.NEXT_PUBLIC_DEPLOY_BLOCK) || 0,
+    blockData: false,
+  });
+
+  const { data: ChallengeResult } = useScaffoldEventHistory({
+    contractName: "Sportsbook",
+    eventName: "ChallengeResult",
     fromBlock: Number(process.env.NEXT_PUBLIC_DEPLOY_BLOCK) || 0,
     blockData: false,
   });
@@ -37,6 +52,31 @@ const Home: NextPage = () => {
     );
   }, [ChallengeCreated]);
 
+  useEffect(() => {
+    setChallengeCanceled(
+      ChallengeCanceled?.map(event => {
+        return {
+          challengeId: event.args[0].toString(),
+          canceledBy: event.args[1].toString(),
+        } as ChallengeCanceledProps;
+      }).filter(Boolean) as ChallengeCanceledProps[],
+    );
+  }, [ChallengeCanceled]);
+
+  useEffect(() => {
+    setChallengeResults(
+      ChallengeResult?.map(event => {
+        return {
+          challengeId: event.args[0].toString(),
+          team1: event.args[1],
+          team2: event.args[2],
+          team1Result: event.args[3],
+          team2Result: event.args[4],
+        } as ChallengeResultProps;
+      }).filter(Boolean) as ChallengeResultProps[],
+    );
+  }, [ChallengeResult]);
+
   useScaffoldEventSubscriber({
     contractName: "Sportsbook",
     eventName: "ChallengeCreated",
@@ -52,7 +92,48 @@ const Home: NextPage = () => {
           team2: team2,
           bet: parseInt(bet.toString()),
         } as ChallengeCreatedProps;
-        return [newChallenge, ...prev];
+        return [...prev, newChallenge];
+      });
+    },
+  });
+
+  useScaffoldEventSubscriber({
+    contractName: "Sportsbook",
+    eventName: "ChallengeCanceled",
+    listener: (challengeId, canceledBy) => {
+      const newChallengeId = parseInt(challengeId.toString());
+
+      setChallengeCanceled(prev => {
+        if (!prev) prev = [];
+        if (prev.some(e => e.challengeId === newChallengeId)) return prev;
+
+        const newChallenge = {
+          challengeId: newChallengeId,
+          canceledBy: canceledBy,
+        } as ChallengeCanceledProps;
+        return [...prev, newChallenge];
+      });
+    },
+  });
+
+  useScaffoldEventSubscriber({
+    contractName: "Sportsbook",
+    eventName: "ChallengeResult",
+    listener: (challengeId, team1, team2, team1Result, team2Result) => {
+      const newChallengeId = parseInt(challengeId.toString());
+
+      setChallengeResults(prev => {
+        if (!prev) prev = [];
+        if (prev.some(e => e.challengeId === newChallengeId)) return prev;
+
+        const newChallenge = {
+          challengeId: newChallengeId,
+          team1: team1,
+          team2: team2,
+          team1Result: parseInt(team1Result.toString()),
+          team2Result: parseInt(team2Result.toString()),
+        } as ChallengeResultProps;
+        return [...prev, newChallenge];
       });
     },
   });
@@ -99,17 +180,23 @@ const Home: NextPage = () => {
                 <CardBody>
                   <Heading size="xl">🏀 See your active challenges! ⚽</Heading>
                   <Flex direction="column" alignItems="center" justifyContent="center">
-                    {challengeCreated?.map((challenge, index) => (
-                      <div key={index}>
+                    {challengeCreated?.map(challenge => {
+                      const matchingChallengeCanceled = challengeCanceled?.find(
+                        cancel => cancel.challengeId === challenge.challengeId,
+                      );
+                      const matchingChallengeResult = challengeResults?.find(
+                        result => result.challengeId === challenge.challengeId,
+                      );
+
+                      return (
                         <ShowChallengeCreated
-                          challenge={challenge}
-                          challengeId={index}
-                          team1={challenge.team1}
-                          team2={challenge.team2}
-                          bet={challenge.bet}
+                          key={challenge.challengeId}
+                          challenge={[challenge]}
+                          challengeCanceled={matchingChallengeCanceled ? [matchingChallengeCanceled] : []}
+                          challengeResult={matchingChallengeResult ? [matchingChallengeResult] : []}
                         />
-                      </div>
-                    ))}
+                      );
+                    })}
                   </Flex>
                 </CardBody>
               </Stack>
