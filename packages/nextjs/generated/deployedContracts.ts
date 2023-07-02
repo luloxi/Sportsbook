@@ -5,7 +5,7 @@ const contracts = {
       name: "localhost",
       contracts: {
         Sportsbook: {
-          address: "0x9A676e781A523b5d0C0e43731313A708CB607508",
+          address: "0x3Aa5ebB10DC797CAC828524e59A333d0A371443c",
           abi: [
             {
               inputs: [],

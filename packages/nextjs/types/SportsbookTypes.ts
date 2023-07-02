@@ -9,7 +9,6 @@ export type ChallengeResultProps = {
   challengeId: number;
   team1: string;
   team2: string;
-  referee: string;
   team1Result: number;
   team2Result: number;
 };

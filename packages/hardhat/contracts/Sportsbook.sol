@@ -32,7 +32,8 @@ contract Sportsbook {
         PENDING,
         ACCEPTED,
         STARTED,
-        FINISHED
+        FINISHED,
+        CANCELED
     }
 
     enum UpdateRefereeState {
@@ -182,7 +183,7 @@ contract Sportsbook {
             require(success2, "Sportsbook: Transfer to team2 failed.");
         }
         // Effect
-        matchChallenges[_challengeId].state = MatchState.FINISHED;
+        matchChallenges[_challengeId].state = MatchState.CANCELED;
         emit ChallengeCanceled(_challengeId, msg.sender);
     }
 
