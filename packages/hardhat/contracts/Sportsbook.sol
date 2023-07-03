@@ -58,19 +58,23 @@ contract Sportsbook {
     MatchChallenge[] public matchChallenges;
     mapping(uint256 => UpdateReferee) public updateRefereeRequests;
 
-    event ChallengeCreated(uint256 indexed challengeId, address indexed team1, address indexed team2, uint256 bet);
-    event ChallengeAccepted(uint256 indexed challengeId, address indexed team1, address indexed team2, address referee);
+    event ChallengeCreated(
+        uint256 indexed challengeId, address indexed team1, address indexed team2, address referee, uint256 bet
+    );
+    event ChallengeAccepted(uint256 indexed challengeId, address indexed team1, address indexed team2);
     event ChallengeStarted(uint256 indexed challengeId, address indexed referee, address team1, address team2);
     event ChallengeResult(
         uint256 indexed challengeId, address indexed team1, address indexed team2, uint8 team1Result, uint8 team2Result
     );
     event ChallengeCanceled(uint256 indexed challengeId, address indexed canceledBy);
+    event UpdateRefereeRequest(uint256 indexed challengeId, address indexed proposingTeam, address indexed newReferee);
+    event UpdateRefereeAccepted(uint256 indexed challengeId, address indexed newReferee);
 
-    constructor() payable {}
+    constructor() {}
 
     function createChallenge(address _team2, address referee) public payable {
         matchChallenges.push(MatchChallenge(msg.sender, _team2, MatchState.PENDING, msg.value, referee));
-        emit ChallengeCreated(matchChallenges.length - 1, msg.sender, _team2, msg.value);
+        emit ChallengeCreated(matchChallenges.length - 1, msg.sender, _team2, referee, msg.value);
     }
 
     function acceptChallenge(uint256 _challengeId) public payable {
@@ -79,12 +83,7 @@ contract Sportsbook {
         require(matchChallenges[_challengeId].state == MatchState.PENDING, "Challenge has already been accepted!");
 
         matchChallenges[_challengeId].state = MatchState.ACCEPTED;
-        emit ChallengeAccepted(
-            _challengeId,
-            matchChallenges[_challengeId].team1,
-            matchChallenges[_challengeId].team2,
-            matchChallenges[_challengeId].referee
-        );
+        emit ChallengeAccepted(_challengeId, matchChallenges[_challengeId].team1, matchChallenges[_challengeId].team2);
     }
 
     function startChallenge(uint256 _challengeId) public {

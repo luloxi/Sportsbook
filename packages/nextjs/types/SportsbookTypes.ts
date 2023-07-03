@@ -2,8 +2,22 @@ export type ChallengeCreatedProps = {
   challengeId: number;
   team1: string;
   team2: string;
+  referee: string;
   bet: number;
 };
+
+export interface ChallengeAcceptedProps {
+  challengeId: number;
+  team1: string;
+  team2: string;
+}
+
+export interface ChallengeStartedProps {
+  challengeId: number;
+  referee: string;
+  team1: string;
+  team2: string;
+}
 
 export type ChallengeResultProps = {
   challengeId: number;
@@ -18,8 +32,23 @@ export type ChallengeCanceledProps = {
   canceledBy: string;
 };
 
-export type MyChallengeCreatedProps = {
+export type UpdateRefereeRequestProps = {
+  challengeId: number;
+  proposingTeam: string;
+  newReferee: string;
+};
+
+export type UpdateRefereeAcceptedProps = {
+  challengeId: number;
+  newReferee: string;
+};
+
+export type ChallengeCardProps = {
   challenge: ChallengeCreatedProps;
-  challengeCanceled?: ChallengeCanceledProps; // Added the challengeCanceled prop
-  challengeResult?: ChallengeResultProps; // Added the challengeResult prop
+  challengeAccepted?: ChallengeAcceptedProps;
+  challengeStarted?: ChallengeStartedProps;
+  challengeResult?: ChallengeResultProps;
+  challengeCanceled?: ChallengeCanceledProps;
+  updateRefereeRequest?: UpdateRefereeRequestProps;
+  updateRefereeAccepted?: UpdateRefereeAcceptedProps;
 };

@@ -5,11 +5,11 @@ const contracts = {
       name: "localhost",
       contracts: {
         Sportsbook: {
-          address: "0x3Aa5ebB10DC797CAC828524e59A333d0A371443c",
+          address: "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
           abi: [
             {
               inputs: [],
-              stateMutability: "payable",
+              stateMutability: "nonpayable",
               type: "constructor",
             },
             {
@@ -31,12 +31,6 @@ const contracts = {
                   indexed: true,
                   internalType: "address",
                   name: "team2",
-                  type: "address",
-                },
-                {
-                  indexed: false,
-                  internalType: "address",
-                  name: "referee",
                   type: "address",
                 },
               ],
@@ -81,6 +75,12 @@ const contracts = {
                   indexed: true,
                   internalType: "address",
                   name: "team2",
+                  type: "address",
+                },
+                {
+                  indexed: false,
+                  internalType: "address",
+                  name: "referee",
                   type: "address",
                 },
                 {
@@ -159,6 +159,50 @@ const contracts = {
                 },
               ],
               name: "ChallengeStarted",
+              type: "event",
+            },
+            {
+              anonymous: false,
+              inputs: [
+                {
+                  indexed: true,
+                  internalType: "uint256",
+                  name: "challengeId",
+                  type: "uint256",
+                },
+                {
+                  indexed: true,
+                  internalType: "address",
+                  name: "newReferee",
+                  type: "address",
+                },
+              ],
+              name: "UpdateRefereeAccepted",
+              type: "event",
+            },
+            {
+              anonymous: false,
+              inputs: [
+                {
+                  indexed: true,
+                  internalType: "uint256",
+                  name: "challengeId",
+                  type: "uint256",
+                },
+                {
+                  indexed: true,
+                  internalType: "address",
+                  name: "proposingTeam",
+                  type: "address",
+                },
+                {
+                  indexed: true,
+                  internalType: "address",
+                  name: "newReferee",
+                  type: "address",
+                },
+              ],
+              name: "UpdateRefereeRequest",
               type: "event",
             },
             {
