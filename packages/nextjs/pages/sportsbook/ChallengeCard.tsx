@@ -24,8 +24,6 @@ const ChallengeCard = ({
 
   const { address } = useAccount();
 
-  console.log("UpdateRefereeRequest: ", updateRefereeRequest);
-
   const { writeAsync: acceptChallenge } = useScaffoldContractWrite({
     contractName: "Sportsbook",
     functionName: "acceptChallenge",
@@ -282,12 +280,12 @@ const ChallengeCard = ({
                     {updateRefereeRequest && (
                       <AccordionPanel pb={4}>
                         <Box className="flex items-center justify-center space-x-2" margin={0}>
-                          <Address address={updateRefereeRequest.proposingTeam} />
+                          <Address address={updateRefereeRequest?.proposingTeam} />
                           <p>has proposed</p>
-                          <Address address={updateRefereeRequest.newReferee} />
+                          <Address address={updateRefereeRequest?.newReferee} />
                           <p>as a new referee</p>
                         </Box>
-                        {updateRefereeRequest.proposingTeam != address && (
+                        {updateRefereeRequest?.proposingTeam != address && (
                           <Flex justifyContent={"space-around"}>
                             <Button
                               onClick={answerYesToUpdateReferee}

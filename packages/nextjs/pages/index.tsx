@@ -186,18 +186,26 @@ const Home: NextPage = () => {
     contractName: "Sportsbook",
     eventName: "UpdateRefereeRequest",
     listener: (challengeId, proposingTeam, newReferee) => {
-      setUpdateRefereeRequestHistory(prev => {
+      setUpdateRefereeRequestHistory(prevHistory => {
         const newChallengeId = parseInt(challengeId.toString());
-        if (prev.some(challenge => challenge.challengeId === newChallengeId)) {
-          return prev;
+
+        const updatedHistory = { ...prevHistory };
+
+        if (!updatedHistory[newChallengeId]) {
+          updatedHistory[newChallengeId] = {
+            challengeId: newChallengeId,
+            properties: [],
+          };
         }
 
-        const newChallenge: UpdateRefereeRequestProps = {
-          challengeId: newChallengeId,
+        const newChallenge = {
           proposingTeam,
           newReferee,
         };
-        return [newChallenge, ...prev];
+
+        updatedHistory[newChallengeId].properties.push(newChallenge);
+
+        return updatedHistory;
       });
     },
   });
@@ -206,18 +214,26 @@ const Home: NextPage = () => {
     contractName: "Sportsbook",
     eventName: "UpdateRefereeResponse",
     listener: (challengeId, newReferee, updateAccepted) => {
-      setUpdateRefereeResponseHistory(prev => {
+      setUpdateRefereeResponseHistory(prevHistory => {
         const newChallengeId = parseInt(challengeId.toString());
-        if (prev.some(challenge => challenge.challengeId === newChallengeId)) {
-          return prev;
+
+        const updatedHistory = { ...prevHistory };
+
+        if (!updatedHistory[newChallengeId]) {
+          updatedHistory[newChallengeId] = {
+            challengeId: newChallengeId,
+            properties: [],
+          };
         }
 
-        const newChallenge: UpdateRefereeResponseProps = {
-          challengeId: newChallengeId,
+        const newChallenge = {
           newReferee,
           updateAccepted,
         };
-        return [newChallenge, ...prev];
+
+        updatedHistory[newChallengeId].properties.push(newChallenge);
+
+        return updatedHistory;
       });
     },
   });
@@ -286,10 +302,14 @@ const Home: NextPage = () => {
   useEffect(() => {
     if (UpdateRefereeRequestHistory) {
       const mappedHistory = UpdateRefereeRequestHistory.map(event => ({
-        challengeId: event.args[0].toString(),
-        proposingTeam: event.args[1],
-        newReferee: event.args[2],
-      })) as UpdateRefereeRequestProps[];
+        challengeId: parseInt(event.args[0].toString()),
+        properties: [
+          {
+            proposingTeam: event.args[1],
+            newReferee: event.args[2],
+          },
+        ],
+      }));
       setUpdateRefereeRequestHistory(mappedHistory);
     }
   }, [UpdateRefereeRequestHistory]);
@@ -298,9 +318,13 @@ const Home: NextPage = () => {
     if (UpdateRefereeResponseHistory) {
       const mappedHistory = UpdateRefereeResponseHistory.map(event => ({
         challengeId: event.args[0].toString(),
-        newReferee: event.args[1],
-        updateAccepted: event.args[2],
-      })) as UpdateRefereeResponseProps[];
+        properties: [
+          {
+            newReferee: event.args[1],
+            updateAccepted: event.args[2],
+          },
+        ],
+      }));
       setUpdateRefereeResponseHistory(mappedHistory);
     }
   }, [UpdateRefereeResponseHistory]);
@@ -311,22 +335,30 @@ const Home: NextPage = () => {
     const challengeStarted = challengeStartedHistory.find(result => result.challengeId === challenge.challengeId);
     const challengeResult = challengeResultHistory.find(result => result.challengeId === challenge.challengeId);
 
-    const updateRefereeRequests = updateRefereeRequestHistory.filter(
-      request => request.challengeId === challenge.challengeId,
-    );
-    const updateRefereeResponses = updateRefereeResponseHistory.filter(
-      response => response.challengeId === challenge.challengeId,
-    );
+    const updateRefereeRequests = Array.isArray(updateRefereeRequestHistory)
+      ? updateRefereeRequestHistory.filter(request => request && request.challengeId === challenge.challengeId)
+      : [];
+    const updateRefereeResponses = Array.isArray(updateRefereeResponseHistory)
+      ? updateRefereeResponseHistory.filter(response => response && response.challengeId === challenge.challengeId)
+      : [];
 
-    console.log("Update referee request", updateRefereeRequests);
+    const newestRequest = updateRefereeRequests
+      .filter(request => request.challengeId === challenge.challengeId)
+      .map(response => response.properties.find(event => event.newReferee))
+      .pop();
 
-    const lastAcceptedResponse = updateRefereeResponses.find(response => response.updateAccepted);
-    const newestRequest = updateRefereeRequests[updateRefereeRequests.length - 1];
+    // console.log("Newest request", updateRefereeRequests);
+
+    const lastAcceptedResponse = updateRefereeResponses
+      .filter(response => response.challengeId === challenge.challengeId)
+      .map(response => response.properties.find(event => event.updateAccepted))
+      .pop();
 
     const eventToShow =
-      updateRefereeRequests.length > 0 &&
-      updateRefereeResponses.length > 0 &&
-      updateRefereeRequests.length === updateRefereeResponses.length
+      updateRefereeRequests.filter(request => request.challengeId === challenge.challengeId).length > 0 &&
+      updateRefereeResponses.filter(response => response.challengeId === challenge.challengeId).length > 0 &&
+      updateRefereeRequests.filter(request => request.challengeId === challenge.challengeId).length ===
+        updateRefereeResponses.filter(response => response.challengeId === challenge.challengeId).length
         ? {
             response: lastAcceptedResponse ? lastAcceptedResponse : undefined,
           }
