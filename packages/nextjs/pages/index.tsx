@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useEffect } from "react";
 import CreateChallengeBox from "../pages/sportsbook/CreateChallengeBox";
 import ChallengeCard from "./sportsbook/ChallengeCard";
-import { Card, CardBody, Flex, Heading, Stack } from "@chakra-ui/react";
+import { Card, CardBody, Flex, Heading } from "@chakra-ui/react";
 import type { NextPage } from "next";
 import { MetaHeader } from "~~/components/MetaHeader";
 import { useScaffoldEventHistory, useScaffoldEventSubscriber } from "~~/hooks/scaffold-eth";
@@ -76,8 +76,6 @@ const Home: NextPage = () => {
     fromBlock: Number(process.env.NEXT_PUBLIC_DEPLOY_BLOCK) || 0,
     blockData: false,
   });
-
-  console.log("Testing events", updateRefereeRequestHistory);
 
   // Event subscription hooks
   useScaffoldEventSubscriber({
@@ -223,6 +221,7 @@ const Home: NextPage = () => {
     },
   });
 
+  // Event history hooks
   useEffect(() => {
     if (ChallengeCreatedHistory) {
       const mappedHistory = ChallengeCreatedHistory.map(event => ({
@@ -342,48 +341,46 @@ const Home: NextPage = () => {
               textColor={"white"}
               backgroundColor={"orange.800"}
             >
-              <Stack>
-                <CardBody>
-                  <Heading size="xl">🏀 See your active challenges! ⚽</Heading>
-                  <Flex direction="column" alignItems="center" justifyContent="center">
-                    {challengeHistory?.map(challenge => {
-                      const matchingChallengeCanceled = challengeCanceledHistory.find(
-                        cancel => cancel.challengeId === challenge.challengeId,
-                      );
-                      const matchingChallengeAccepted = challengeAcceptedHistory.find(
-                        result => result.challengeId === challenge.challengeId,
-                      );
-                      const matchingChallengeStarted = challengeStartedHistory.find(
-                        result => result.challengeId === challenge.challengeId,
-                      );
-                      const matchingChallengeResult = challengeResultHistory.find(
-                        result => result.challengeId === challenge.challengeId,
-                      );
-                      const matchingUpdateRefereeRequest = updateRefereeRequestHistory.find(
-                        result => result.challengeId === challenge.challengeId,
-                      );
-                      const matchingUpdateRefereeAccepted = updateRefereeAcceptedHistory.find(
-                        result => result.challengeId === challenge.challengeId,
-                      );
+              <CardBody>
+                <Heading size="xl">🏀 See your active challenges! ⚽</Heading>
+                <Flex direction="column" alignItems="center" justifyContent="center">
+                  {challengeHistory?.map(challenge => {
+                    const matchingChallengeCanceled = challengeCanceledHistory.find(
+                      cancel => cancel.challengeId === challenge.challengeId,
+                    );
+                    const matchingChallengeAccepted = challengeAcceptedHistory.find(
+                      result => result.challengeId === challenge.challengeId,
+                    );
+                    const matchingChallengeStarted = challengeStartedHistory.find(
+                      result => result.challengeId === challenge.challengeId,
+                    );
+                    const matchingChallengeResult = challengeResultHistory.find(
+                      result => result.challengeId === challenge.challengeId,
+                    );
+                    const matchingUpdateRefereeRequest = updateRefereeRequestHistory
+                      .filter(request => request.challengeId === challenge.challengeId)
+                      .pop(); // Retrieve the last request for the challenge
+                    const matchingUpdateRefereeAccepted = updateRefereeAcceptedHistory
+                      .filter(request => request.challengeId === challenge.challengeId)
+                      .pop(); // Retrieve the last request for the challenge
 
-                      return (
-                        <ChallengeCard
-                          key={challenge.challengeId}
-                          challenge={challenge}
-                          challengeAccepted={matchingChallengeAccepted ? matchingChallengeAccepted : undefined}
-                          challengeStarted={matchingChallengeStarted ? matchingChallengeStarted : undefined}
-                          challengeResult={matchingChallengeResult ? matchingChallengeResult : undefined}
-                          challengeCanceled={matchingChallengeCanceled ? matchingChallengeCanceled : undefined}
-                          updateRefereeRequest={matchingUpdateRefereeRequest ? matchingUpdateRefereeRequest : undefined}
-                          updateRefereeAccepted={
-                            matchingUpdateRefereeAccepted ? matchingUpdateRefereeAccepted : undefined
-                          }
-                        />
-                      );
-                    })}
-                  </Flex>
-                </CardBody>
-              </Stack>
+                    return (
+                      <ChallengeCard
+                        key={challenge.challengeId}
+                        challenge={challenge}
+                        challengeAccepted={matchingChallengeAccepted ? matchingChallengeAccepted : undefined}
+                        challengeStarted={matchingChallengeStarted ? matchingChallengeStarted : undefined}
+                        challengeResult={matchingChallengeResult ? matchingChallengeResult : undefined}
+                        challengeCanceled={matchingChallengeCanceled ? matchingChallengeCanceled : undefined}
+                        updateRefereeRequest={matchingUpdateRefereeRequest ? matchingUpdateRefereeRequest : undefined}
+                        updateRefereeAccepted={
+                          matchingUpdateRefereeAccepted ? matchingUpdateRefereeAccepted : undefined
+                        }
+                      />
+                    );
+                  })}
+                </Flex>
+              </CardBody>
             </Card>
           </Flex>
         </>

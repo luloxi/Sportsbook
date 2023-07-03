@@ -62,10 +62,10 @@ const CreateChallengeBox = ({}) => {
             }}
             value={createChallengeValue}
           />
-          Your oponent will have to pay the same to accept.
+          Your oponent will have to pay the same to accept
           <br />
           <Text fontWeight={"bold"} mt={0} mb={0}>
-            Winner gets all, Tie gives back the ETH.
+            Winner gets all, Tie gives back the ETH
           </Text>
           <Button
             variant="solid"
