@@ -13,7 +13,6 @@ import {
   ChallengeCreatedProps,
   ChallengeResultProps,
   ChallengeStartedProps,
-  UpdateRefereeEvent,
   UpdateRefereeRequestProps,
   UpdateRefereeResponseProps,
 } from "~~/types/SportsbookTypes";
@@ -306,6 +305,46 @@ const Home: NextPage = () => {
     }
   }, [UpdateRefereeResponseHistory]);
 
+  const challengeCards = challengeHistory?.map(challenge => {
+    const challengeCanceled = challengeCanceledHistory.find(cancel => cancel.challengeId === challenge.challengeId);
+    const challengeAccepted = challengeAcceptedHistory.find(result => result.challengeId === challenge.challengeId);
+    const challengeStarted = challengeStartedHistory.find(result => result.challengeId === challenge.challengeId);
+    const challengeResult = challengeResultHistory.find(result => result.challengeId === challenge.challengeId);
+
+    const updateRefereeRequests = updateRefereeRequestHistory.filter(
+      request => request.challengeId === challenge.challengeId,
+    );
+    const updateRefereeResponses = updateRefereeResponseHistory.filter(
+      response => response.challengeId === challenge.challengeId,
+    );
+
+    console.log("Update referee request", updateRefereeRequests);
+
+    const lastAcceptedResponse = updateRefereeResponses.find(response => response.updateAccepted);
+    const newestRequest = updateRefereeRequests[updateRefereeRequests.length - 1];
+
+    const eventToShow =
+      updateRefereeRequests.length > 0 &&
+      updateRefereeResponses.length > 0 &&
+      updateRefereeRequests.length === updateRefereeResponses.length
+        ? {
+            response: lastAcceptedResponse ? lastAcceptedResponse : undefined,
+          }
+        : {
+            request: newestRequest ? newestRequest : undefined,
+            response: lastAcceptedResponse ? lastAcceptedResponse : undefined,
+          };
+
+    return {
+      challenge,
+      challengeAccepted,
+      challengeStarted,
+      challengeResult,
+      challengeCanceled,
+      updateRefereeEvent: eventToShow,
+    };
+  });
+
   return (
     <>
       <MetaHeader />
@@ -347,66 +386,15 @@ const Home: NextPage = () => {
               <CardBody>
                 <Heading size="xl">🏀 See your active challenges! ⚽</Heading>
                 <Flex direction="column" alignItems="center" justifyContent="center">
-                  {challengeHistory?.map(challenge => {
-                    // Retrieve the events
-                    const challengeCanceled = challengeCanceledHistory.find(
-                      cancel => cancel.challengeId === challenge.challengeId,
-                    );
-                    const challengeAccepted = challengeAcceptedHistory.find(
-                      result => result.challengeId === challenge.challengeId,
-                    );
-                    const challengeStarted = challengeStartedHistory.find(
-                      result => result.challengeId === challenge.challengeId,
-                    );
-                    const challengeResult = challengeResultHistory.find(
-                      result => result.challengeId === challenge.challengeId,
-                    );
-
-                    // Retrieve the update events
-                    const updateRefereeRequests = updateRefereeRequestHistory.filter(
-                      request => request.challengeId === challenge.challengeId,
-                    );
-                    const updateRefereeResponses = updateRefereeResponseHistory.filter(
-                      response => response.challengeId === challenge.challengeId,
-                    );
-
-                    // Determine the event to be passed to the ChallengeCard
-                    let eventToShow: UpdateRefereeEvent | undefined;
-
-                    if (updateRefereeResponses.length > 0) {
-                      // Use the latest response with updateAccepted=true if available
-                      const acceptedResponses = updateRefereeResponses.filter(response => response.updateAccepted);
-
-                      if (acceptedResponses.length > 0) {
-                        eventToShow = {
-                          request:
-                            updateRefereeRequests.length > 0
-                              ? updateRefereeRequests[updateRefereeRequests.length - 1]
-                              : undefined,
-                          response: acceptedResponses[acceptedResponses.length - 1],
-                        };
-                      } else if (updateRefereeRequests.length === updateRefereeResponses.length) {
-                        // If the number of requests and responses is the same, show only the last accepted response
-                        eventToShow = {
-                          response: updateRefereeResponses[updateRefereeResponses.length - 1],
-                        };
-                      } else {
-                        eventToShow = {
-                          request:
-                            updateRefereeRequests.length > 0
-                              ? updateRefereeRequests[updateRefereeRequests.length - 1]
-                              : undefined,
-                          response: updateRefereeResponses[updateRefereeResponses.length - 1],
-                        };
-                      }
-                    } else if (updateRefereeRequests.length > 0) {
-                      // Use the latest request if there are only requests and no responses
-                      eventToShow = {
-                        request: updateRefereeRequests[updateRefereeRequests.length - 1],
-                      };
-                    }
-
-                    return (
+                  {challengeCards.map(
+                    ({
+                      challenge,
+                      challengeAccepted,
+                      challengeStarted,
+                      challengeResult,
+                      challengeCanceled,
+                      updateRefereeEvent,
+                    }) => (
                       <ChallengeCard
                         key={challenge.challengeId}
                         challenge={challenge}
@@ -414,11 +402,11 @@ const Home: NextPage = () => {
                         challengeStarted={challengeStarted}
                         challengeResult={challengeResult}
                         challengeCanceled={challengeCanceled}
-                        updateRefereeRequest={eventToShow?.request}
-                        updateRefereeAccepted={eventToShow?.response}
+                        updateRefereeRequest={updateRefereeEvent?.request}
+                        updateRefereeAccepted={updateRefereeEvent?.response}
                       />
-                    );
-                  })}
+                    ),
+                  )}
                 </Flex>
               </CardBody>
             </Card>

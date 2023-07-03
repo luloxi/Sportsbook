@@ -44,11 +44,6 @@ export type UpdateRefereeResponseProps = {
   updateAccepted: boolean;
 };
 
-export type UpdateRefereeEvent = {
-  request?: UpdateRefereeRequestProps;
-  response?: UpdateRefereeResponseProps;
-};
-
 export type ChallengeCardProps = {
   challenge: ChallengeCreatedProps;
   challengeAccepted?: ChallengeAcceptedProps;

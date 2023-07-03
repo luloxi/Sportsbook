@@ -5,7 +5,7 @@ import { BigNumber, ethers } from "ethers";
 import { useAccount } from "wagmi";
 import { AddressInput } from "~~/components/scaffold-eth";
 import { Address } from "~~/components/scaffold-eth";
-import { useScaffoldContractRead, useScaffoldContractWrite } from "~~/hooks/scaffold-eth";
+import { useScaffoldContractWrite } from "~~/hooks/scaffold-eth";
 import { ChallengeCardProps } from "~~/types/SportsbookTypes";
 
 const ChallengeCard = ({
@@ -71,12 +71,6 @@ const ChallengeCard = ({
     contractName: "Sportsbook",
     functionName: "answerUpdateReferee",
     args: [challenge.challengeId ? BigNumber.from(challenge.challengeId) : undefined, true],
-  });
-
-  const { data: viewUpdateRefereeState } = useScaffoldContractRead({
-    contractName: "Sportsbook",
-    functionName: "viewUpdateRefereeState",
-    args: [challenge.challengeId ? BigNumber.from(challenge.challengeId) : undefined],
   });
 
   useEffect(() => {
@@ -201,7 +195,7 @@ const ChallengeCard = ({
                   </Button>
                 )}
 
-                {(address == challenge.team1 || address == challenge.team2) &&
+                {(address == challenge.team1 || address == challenge.team2 || address == challenge.referee) &&
                   !challengeStarted &&
                   !challengeCanceled && (
                     <Button onClick={() => deleteChallenge()} backgroundColor={"red"} textColor={"white"}>
@@ -259,7 +253,7 @@ const ChallengeCard = ({
                 !challengeCanceled && (
                   <AccordionItem>
                     <h2>
-                      <AccordionButton backgroundColor={viewUpdateRefereeState == 1 ? "blue.600" : "orange.800"}>
+                      <AccordionButton backgroundColor={updateRefereeRequest ? "blue.600" : "orange.800"}>
                         <Box as="span" flex="1" textAlign="left">
                           Update referee
                         </Box>
