@@ -71,12 +71,6 @@ const ChallengeCard = ({
     args: [challenge.challengeId ? BigNumber.from(challenge.challengeId) : undefined, true],
   });
 
-  const { data: viewMatchReferee } = useScaffoldContractRead({
-    contractName: "Sportsbook",
-    functionName: "viewMatchReferee",
-    args: [challenge.challengeId ? BigNumber.from(challenge.challengeId) : undefined],
-  });
-
   const { data: viewUpdateRefereeState } = useScaffoldContractRead({
     contractName: "Sportsbook",
     functionName: "viewUpdateRefereeState",
@@ -199,7 +193,7 @@ const ChallengeCard = ({
                   </Button>
                 )}
 
-                {address == viewMatchReferee && challengeAccepted && !challengeStarted && !challengeCanceled && (
+                {address == refereeAddress && challengeAccepted && !challengeStarted && !challengeCanceled && (
                   <Button onClick={() => startChallenge()} backgroundColor={"blue"} textColor={"white"}>
                     Start challenge
                   </Button>
@@ -213,7 +207,7 @@ const ChallengeCard = ({
                     </Button>
                   )}
               </Flex>
-              {address == viewMatchReferee && challengeStarted && !challengeResult && !challengeCanceled && (
+              {address == refereeAddress && challengeStarted && !challengeResult && !challengeCanceled && (
                 <Flex justifyContent={"space-evenly"} gap={3}>
                   <Input
                     backgroundColor={"blue.900"}
@@ -333,9 +327,9 @@ const ChallengeCard = ({
                   {challengeResult ? (
                     <>
                       <Box marginTop={0} className="flex items-center justify-center space-x-2" margin={0}>
-                        <Address address={challengeResult.team2} />
+                        <Address address={challenge.team2} />
                         <p>was challenged by</p>
-                        <Address address={challengeResult.team1} />
+                        <Address address={challenge.team1} />
                       </Box>
                       <Text margin={0}>
                         to a $SPORT match{" "}
@@ -350,7 +344,7 @@ const ChallengeCard = ({
 
                       {!challengeCanceled && (
                         <Box className="flex items-center justify-center space-x-2">
-                          <Address address={viewMatchReferee} />
+                          <Address address={refereeAddress} />
                           <p>was the referee and set the score</p>
                         </Box>
                       )}
