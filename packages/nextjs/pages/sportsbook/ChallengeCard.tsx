@@ -22,32 +22,34 @@ const ChallengeCard = ({
   const [completeChallengeTeam2Score, setCompleteChallengeTeam2Score] = useState<string>("");
   const [refereeAddress, setRefereeAddress] = useState(challenge.referee);
 
+  const [challengeIdArg, setChallengeIdArg] = useState<string>(challenge.challengeId.toString());
+
   const { address } = useAccount();
 
   const { writeAsync: acceptChallenge } = useScaffoldContractWrite({
     contractName: "Sportsbook",
     functionName: "acceptChallenge",
-    args: [challenge.challengeId ? BigNumber.from(challenge.challengeId) : BigNumber.from(0)],
+    args: [challengeIdArg ? BigNumber.from(challengeIdArg) : BigNumber.from(0)],
     value: challenge.bet ? ethers.utils.formatEther(challenge.bet.toString()) : undefined,
   });
 
   const { writeAsync: deleteChallenge } = useScaffoldContractWrite({
     contractName: "Sportsbook",
     functionName: "deleteChallenge",
-    args: [challenge.challengeId ? BigNumber.from(challenge.challengeId) : BigNumber.from(0)],
+    args: [challengeIdArg ? BigNumber.from(challengeIdArg) : BigNumber.from(0)],
   });
 
   const { writeAsync: startChallenge } = useScaffoldContractWrite({
     contractName: "Sportsbook",
     functionName: "startChallenge",
-    args: [challenge.challengeId ? BigNumber.from(challenge.challengeId) : undefined],
+    args: [challengeIdArg ? BigNumber.from(challengeIdArg) : undefined],
   });
 
   const { writeAsync: completeChallenge } = useScaffoldContractWrite({
     contractName: "Sportsbook",
     functionName: "completeChallenge",
     args: [
-      challenge.challengeId ? BigNumber.from(challenge.challengeId) : undefined,
+      challengeIdArg ? BigNumber.from(challengeIdArg) : undefined,
       completeChallengeTeam1Score ? parseInt(completeChallengeTeam1Score) : undefined,
       completeChallengeTeam2Score ? parseInt(completeChallengeTeam2Score) : undefined,
     ],
@@ -56,19 +58,19 @@ const ChallengeCard = ({
   const { writeAsync: updateReferee } = useScaffoldContractWrite({
     contractName: "Sportsbook",
     functionName: "updateReferee",
-    args: [challenge.challengeId ? BigNumber.from(challenge.challengeId) : BigNumber.from(0), updateRefereeAddress],
+    args: [challengeIdArg ? BigNumber.from(challengeIdArg) : undefined, updateRefereeAddress],
   });
 
   const { writeAsync: answerNoToUpdateReferee } = useScaffoldContractWrite({
     contractName: "Sportsbook",
     functionName: "answerUpdateReferee",
-    args: [challenge.challengeId ? BigNumber.from(challenge.challengeId) : undefined, false],
+    args: [challengeIdArg ? BigNumber.from(challengeIdArg) : undefined, false],
   });
 
   const { writeAsync: answerYesToUpdateReferee } = useScaffoldContractWrite({
     contractName: "Sportsbook",
     functionName: "answerUpdateReferee",
-    args: [challenge.challengeId ? BigNumber.from(challenge.challengeId) : undefined, true],
+    args: [challengeIdArg ? BigNumber.from(challengeIdArg) : undefined, true],
   });
 
   useEffect(() => {
@@ -78,6 +80,10 @@ const ChallengeCard = ({
       setRefereeAddress(challenge.referee);
     }
   }, [updateRefereeAccepted, challenge.referee]);
+
+  if (challenge && challenge.challengeId && challengeIdArg != challenge.challengeId.toString()) {
+    setChallengeIdArg(challenge.challengeId.toString());
+  }
 
   return (
     <div key={challenge.challengeId}>
