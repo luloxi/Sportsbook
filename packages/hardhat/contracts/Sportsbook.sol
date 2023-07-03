@@ -68,7 +68,7 @@ contract Sportsbook {
     );
     event ChallengeCanceled(uint256 indexed challengeId, address indexed canceledBy);
     event UpdateRefereeRequest(uint256 indexed challengeId, address indexed proposingTeam, address indexed newReferee);
-    event UpdateRefereeAccepted(uint256 indexed challengeId, address indexed newReferee);
+    event UpdateRefereeResponse(uint256 indexed challengeId, address indexed newReferee, bool updateAccepted);
 
     constructor() {}
 
@@ -162,7 +162,7 @@ contract Sportsbook {
         if (_choice == true) {
             matchChallenges[_challengeId].referee = updateRefereeRequests[_challengeId].newReferee;
         }
-        emit UpdateRefereeAccepted(_challengeId, updateRefereeRequests[_challengeId].newReferee);
+        emit UpdateRefereeResponse(_challengeId, updateRefereeRequests[_challengeId].newReferee, _choice);
     }
 
     function deleteChallenge(uint256 _challengeId) public {

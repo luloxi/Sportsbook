@@ -13,8 +13,9 @@ import {
   ChallengeCreatedProps,
   ChallengeResultProps,
   ChallengeStartedProps,
-  UpdateRefereeAcceptedProps,
+  UpdateRefereeEvent,
   UpdateRefereeRequestProps,
+  UpdateRefereeResponseProps,
 } from "~~/types/SportsbookTypes";
 
 const Home: NextPage = () => {
@@ -25,7 +26,7 @@ const Home: NextPage = () => {
   const [challengeResultHistory, setChallengeResultHistory] = useState<ChallengeResultProps[]>([]);
   const [challengeCanceledHistory, setChallengeCanceledHistory] = useState<ChallengeCanceledProps[]>([]);
   const [updateRefereeRequestHistory, setUpdateRefereeRequestHistory] = useState<UpdateRefereeRequestProps[]>([]);
-  const [updateRefereeAcceptedHistory, setUpdateRefereeAcceptedHistory] = useState<UpdateRefereeAcceptedProps[]>([]);
+  const [updateRefereeResponseHistory, setUpdateRefereeResponseHistory] = useState<UpdateRefereeResponseProps[]>([]);
 
   // Event history hooks
   const { data: ChallengeCreatedHistory } = useScaffoldEventHistory({
@@ -70,9 +71,9 @@ const Home: NextPage = () => {
     blockData: false,
   });
 
-  const { data: UpdateRefereeAccepted } = useScaffoldEventHistory({
+  const { data: UpdateRefereeResponseHistory } = useScaffoldEventHistory({
     contractName: "Sportsbook",
-    eventName: "UpdateRefereeAccepted",
+    eventName: "UpdateRefereeResponse",
     fromBlock: Number(process.env.NEXT_PUBLIC_DEPLOY_BLOCK) || 0,
     blockData: false,
   });
@@ -204,17 +205,18 @@ const Home: NextPage = () => {
 
   useScaffoldEventSubscriber({
     contractName: "Sportsbook",
-    eventName: "UpdateRefereeAccepted",
-    listener: (challengeId, newReferee) => {
-      setUpdateRefereeAcceptedHistory(prev => {
+    eventName: "UpdateRefereeResponse",
+    listener: (challengeId, newReferee, updateAccepted) => {
+      setUpdateRefereeResponseHistory(prev => {
         const newChallengeId = parseInt(challengeId.toString());
         if (prev.some(challenge => challenge.challengeId === newChallengeId)) {
           return prev;
         }
 
-        const newChallenge: UpdateRefereeAcceptedProps = {
+        const newChallenge: UpdateRefereeResponseProps = {
           challengeId: newChallengeId,
           newReferee,
+          updateAccepted,
         };
         return [newChallenge, ...prev];
       });
@@ -294,14 +296,15 @@ const Home: NextPage = () => {
   }, [UpdateRefereeRequestHistory]);
 
   useEffect(() => {
-    if (UpdateRefereeAccepted) {
-      const mappedHistory = UpdateRefereeAccepted.map(event => ({
+    if (UpdateRefereeResponseHistory) {
+      const mappedHistory = UpdateRefereeResponseHistory.map(event => ({
         challengeId: event.args[0].toString(),
         newReferee: event.args[1],
-      })) as UpdateRefereeAcceptedProps[];
-      setUpdateRefereeAcceptedHistory(mappedHistory);
+        updateAccepted: event.args[2],
+      })) as UpdateRefereeResponseProps[];
+      setUpdateRefereeResponseHistory(mappedHistory);
     }
-  }, [UpdateRefereeAccepted]);
+  }, [UpdateRefereeResponseHistory]);
 
   return (
     <>
@@ -345,37 +348,74 @@ const Home: NextPage = () => {
                 <Heading size="xl">🏀 See your active challenges! ⚽</Heading>
                 <Flex direction="column" alignItems="center" justifyContent="center">
                   {challengeHistory?.map(challenge => {
-                    const matchingChallengeCanceled = challengeCanceledHistory.find(
+                    // Retrieve the events
+                    const challengeCanceled = challengeCanceledHistory.find(
                       cancel => cancel.challengeId === challenge.challengeId,
                     );
-                    const matchingChallengeAccepted = challengeAcceptedHistory.find(
+                    const challengeAccepted = challengeAcceptedHistory.find(
                       result => result.challengeId === challenge.challengeId,
                     );
-                    const matchingChallengeStarted = challengeStartedHistory.find(
+                    const challengeStarted = challengeStartedHistory.find(
                       result => result.challengeId === challenge.challengeId,
                     );
-                    const matchingChallengeResult = challengeResultHistory.find(
+                    const challengeResult = challengeResultHistory.find(
                       result => result.challengeId === challenge.challengeId,
                     );
-                    const matchingUpdateRefereeRequest = updateRefereeRequestHistory
-                      .filter(request => request.challengeId === challenge.challengeId)
-                      .pop(); // Retrieve the last request for the challenge
-                    const matchingUpdateRefereeAccepted = updateRefereeAcceptedHistory
-                      .filter(request => request.challengeId === challenge.challengeId)
-                      .pop(); // Retrieve the last request for the challenge
+
+                    // Retrieve the update events
+                    const updateRefereeRequests = updateRefereeRequestHistory.filter(
+                      request => request.challengeId === challenge.challengeId,
+                    );
+                    const updateRefereeResponses = updateRefereeResponseHistory.filter(
+                      response => response.challengeId === challenge.challengeId,
+                    );
+
+                    // Determine the event to be passed to the ChallengeCard
+                    let eventToShow: UpdateRefereeEvent | undefined;
+
+                    if (updateRefereeResponses.length > 0) {
+                      // Use the latest response with updateAccepted=true if available
+                      const acceptedResponses = updateRefereeResponses.filter(response => response.updateAccepted);
+
+                      if (acceptedResponses.length > 0) {
+                        eventToShow = {
+                          request:
+                            updateRefereeRequests.length > 0
+                              ? updateRefereeRequests[updateRefereeRequests.length - 1]
+                              : undefined,
+                          response: acceptedResponses[acceptedResponses.length - 1],
+                        };
+                      } else if (updateRefereeRequests.length === updateRefereeResponses.length) {
+                        // If the number of requests and responses is the same, show only the last accepted response
+                        eventToShow = {
+                          response: updateRefereeResponses[updateRefereeResponses.length - 1],
+                        };
+                      } else {
+                        eventToShow = {
+                          request:
+                            updateRefereeRequests.length > 0
+                              ? updateRefereeRequests[updateRefereeRequests.length - 1]
+                              : undefined,
+                          response: updateRefereeResponses[updateRefereeResponses.length - 1],
+                        };
+                      }
+                    } else if (updateRefereeRequests.length > 0) {
+                      // Use the latest request if there are only requests and no responses
+                      eventToShow = {
+                        request: updateRefereeRequests[updateRefereeRequests.length - 1],
+                      };
+                    }
 
                     return (
                       <ChallengeCard
                         key={challenge.challengeId}
                         challenge={challenge}
-                        challengeAccepted={matchingChallengeAccepted ? matchingChallengeAccepted : undefined}
-                        challengeStarted={matchingChallengeStarted ? matchingChallengeStarted : undefined}
-                        challengeResult={matchingChallengeResult ? matchingChallengeResult : undefined}
-                        challengeCanceled={matchingChallengeCanceled ? matchingChallengeCanceled : undefined}
-                        updateRefereeRequest={matchingUpdateRefereeRequest ? matchingUpdateRefereeRequest : undefined}
-                        updateRefereeAccepted={
-                          matchingUpdateRefereeAccepted ? matchingUpdateRefereeAccepted : undefined
-                        }
+                        challengeAccepted={challengeAccepted}
+                        challengeStarted={challengeStarted}
+                        challengeResult={challengeResult}
+                        challengeCanceled={challengeCanceled}
+                        updateRefereeRequest={eventToShow?.request}
+                        updateRefereeAccepted={eventToShow?.response}
                       />
                     );
                   })}

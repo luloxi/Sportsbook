@@ -24,6 +24,8 @@ const ChallengeCard = ({
 
   const { address } = useAccount();
 
+  console.log("UpdateRefereeRequest: ", updateRefereeRequest);
+
   const { writeAsync: acceptChallenge } = useScaffoldContractWrite({
     contractName: "Sportsbook",
     functionName: "acceptChallenge",
@@ -264,7 +266,7 @@ const ChallengeCard = ({
                         <AccordionIcon />
                       </AccordionButton>
                     </h2>
-                    {(viewUpdateRefereeState == 0 || viewUpdateRefereeState == undefined) && (
+                    {!updateRefereeRequest && (
                       <AccordionPanel pb={4}>
                         Don&apos;t like the current referee? Propose a new one!
                         <Flex justifyContent={"space-around"} marginTop={4}>
@@ -273,11 +275,7 @@ const ChallengeCard = ({
                               placeholder="Enter address for new referee"
                               value={updateRefereeAddress}
                               onChange={newValue => {
-                                if (newValue) {
-                                  setUpdateRefereeAddress(newValue.toString());
-                                } else {
-                                  setUpdateRefereeAddress("");
-                                }
+                                setUpdateRefereeAddress(newValue.toString());
                               }}
                             />
                             <Button onClick={updateReferee} backgroundColor={"blue.600"} textColor={"white"}>
@@ -287,15 +285,15 @@ const ChallengeCard = ({
                         </Flex>
                       </AccordionPanel>
                     )}
-                    {viewUpdateRefereeState == 1 && (
+                    {updateRefereeRequest && (
                       <AccordionPanel pb={4}>
                         <Box className="flex items-center justify-center space-x-2" margin={0}>
-                          <Address address={updateRefereeRequest?.proposingTeam} />
+                          <Address address={updateRefereeRequest.proposingTeam} />
                           <p>has proposed</p>
-                          <Address address={updateRefereeRequest?.newReferee} />
+                          <Address address={updateRefereeRequest.newReferee} />
                           <p>as a new referee</p>
                         </Box>
-                        {updateRefereeRequest?.proposingTeam != address && (
+                        {updateRefereeRequest.proposingTeam != address && (
                           <Flex justifyContent={"space-around"}>
                             <Button
                               onClick={answerYesToUpdateReferee}

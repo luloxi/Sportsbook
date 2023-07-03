@@ -5,7 +5,7 @@ const contracts = {
       name: "localhost",
       contracts: {
         Sportsbook: {
-          address: "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853",
+          address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
           abi: [
             {
               inputs: [],
@@ -173,11 +173,17 @@ const contracts = {
                 {
                   indexed: true,
                   internalType: "address",
+                  name: "proposingTeam",
+                  type: "address",
+                },
+                {
+                  indexed: true,
+                  internalType: "address",
                   name: "newReferee",
                   type: "address",
                 },
               ],
-              name: "UpdateRefereeAccepted",
+              name: "UpdateRefereeRequest",
               type: "event",
             },
             {
@@ -192,17 +198,17 @@ const contracts = {
                 {
                   indexed: true,
                   internalType: "address",
-                  name: "proposingTeam",
-                  type: "address",
-                },
-                {
-                  indexed: true,
-                  internalType: "address",
                   name: "newReferee",
                   type: "address",
                 },
+                {
+                  indexed: false,
+                  internalType: "bool",
+                  name: "updateAccepted",
+                  type: "bool",
+                },
               ],
-              name: "UpdateRefereeRequest",
+              name: "UpdateRefereeResponse",
               type: "event",
             },
             {

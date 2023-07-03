@@ -38,9 +38,15 @@ export type UpdateRefereeRequestProps = {
   newReferee: string;
 };
 
-export type UpdateRefereeAcceptedProps = {
+export type UpdateRefereeResponseProps = {
   challengeId: number;
   newReferee: string;
+  updateAccepted: boolean;
+};
+
+export type UpdateRefereeEvent = {
+  request?: UpdateRefereeRequestProps;
+  response?: UpdateRefereeResponseProps;
 };
 
 export type ChallengeCardProps = {
@@ -50,5 +56,5 @@ export type ChallengeCardProps = {
   challengeResult?: ChallengeResultProps;
   challengeCanceled?: ChallengeCanceledProps;
   updateRefereeRequest?: UpdateRefereeRequestProps;
-  updateRefereeAccepted?: UpdateRefereeAcceptedProps;
+  updateRefereeAccepted?: UpdateRefereeResponseProps;
 };
