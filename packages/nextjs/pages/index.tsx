@@ -182,31 +182,29 @@ const Home: NextPage = () => {
     },
   });
 
+  const [, rerender] = useState<boolean>(false);
+
   useScaffoldEventSubscriber({
     contractName: "Sportsbook",
     eventName: "UpdateRefereeRequest",
     listener: (challengeId, proposingTeam, newReferee) => {
       setUpdateRefereeRequestHistory(prevHistory => {
         const newChallengeId = parseInt(challengeId.toString());
-
-        const updatedHistory = { ...prevHistory };
-
-        if (!updatedHistory[newChallengeId]) {
-          updatedHistory[newChallengeId] = {
-            challengeId: newChallengeId,
-            properties: [],
-          };
-        }
-
-        const newChallenge = {
-          proposingTeam,
-          newReferee,
+        if (prevHistory[newChallengeId]) return prevHistory;
+        prevHistory[newChallengeId] = {
+          challengeId: newChallengeId,
+          properties: [
+            {
+              proposingTeam,
+              newReferee,
+            },
+          ],
         };
 
-        updatedHistory[newChallengeId].properties.push(newChallenge);
-
-        return updatedHistory;
+        return prevHistory;
       });
+
+      rerender(p => !p);
     },
   });
 
@@ -216,25 +214,21 @@ const Home: NextPage = () => {
     listener: (challengeId, newReferee, updateAccepted) => {
       setUpdateRefereeResponseHistory(prevHistory => {
         const newChallengeId = parseInt(challengeId.toString());
-
-        const updatedHistory = { ...prevHistory };
-
-        if (!updatedHistory[newChallengeId]) {
-          updatedHistory[newChallengeId] = {
-            challengeId: newChallengeId,
-            properties: [],
-          };
-        }
-
-        const newChallenge = {
-          newReferee,
-          updateAccepted,
+        if (prevHistory[newChallengeId]) return prevHistory;
+        prevHistory[newChallengeId] = {
+          challengeId: newChallengeId,
+          properties: [
+            {
+              newReferee,
+              updateAccepted,
+            },
+          ],
         };
 
-        updatedHistory[newChallengeId].properties.push(newChallenge);
-
-        return updatedHistory;
+        return prevHistory;
       });
+
+      rerender(p => !p);
     },
   });
 
@@ -336,29 +330,39 @@ const Home: NextPage = () => {
     const challengeResult = challengeResultHistory.find(result => result.challengeId === challenge.challengeId);
 
     const updateRefereeRequests = Array.isArray(updateRefereeRequestHistory)
-      ? updateRefereeRequestHistory.filter(request => request && request.challengeId === challenge.challengeId)
+      ? updateRefereeRequestHistory.filter(
+          request => request && request.challengeId.toString() === challenge.challengeId.toString(),
+        )
       : [];
     const updateRefereeResponses = Array.isArray(updateRefereeResponseHistory)
-      ? updateRefereeResponseHistory.filter(response => response && response.challengeId === challenge.challengeId)
+      ? updateRefereeResponseHistory.filter(
+          response => response && response.challengeId.toString() === challenge.challengeId.toString(),
+        )
       : [];
 
     const newestRequest = updateRefereeRequests
-      .filter(request => request.challengeId === challenge.challengeId)
+      .filter(request => request.challengeId.toString() === challenge.challengeId.toString())
       .map(response => response.properties.find(event => event.newReferee))
       .pop();
 
-    // console.log("Newest request", updateRefereeRequests);
+    console.log("Newest request", newestRequest);
 
     const lastAcceptedResponse = updateRefereeResponses
-      .filter(response => response.challengeId === challenge.challengeId)
+      .filter(response => response.challengeId.toString() === challenge.challengeId.toString())
       .map(response => response.properties.find(event => event.updateAccepted))
       .pop();
 
+    console.log("lastAcceptedResponse", lastAcceptedResponse);
+
     const eventToShow =
-      updateRefereeRequests.filter(request => request.challengeId === challenge.challengeId).length > 0 &&
-      updateRefereeResponses.filter(response => response.challengeId === challenge.challengeId).length > 0 &&
-      updateRefereeRequests.filter(request => request.challengeId === challenge.challengeId).length ===
-        updateRefereeResponses.filter(response => response.challengeId === challenge.challengeId).length
+      updateRefereeRequests.filter(request => request.challengeId.toString() === challenge.challengeId.toString())
+        .length > 0 &&
+      updateRefereeResponses.filter(response => response.challengeId.toString() === challenge.challengeId.toString())
+        .length > 0 &&
+      updateRefereeRequests.filter(request => request.challengeId.toString() === challenge.challengeId.toString())
+        .length ===
+        updateRefereeResponses.filter(response => response.challengeId.toString() === challenge.challengeId.toString())
+          .length
         ? {
             response: lastAcceptedResponse ? lastAcceptedResponse : undefined,
           }
