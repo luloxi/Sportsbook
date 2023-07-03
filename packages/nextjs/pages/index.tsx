@@ -77,7 +77,7 @@ const Home: NextPage = () => {
     blockData: false,
   });
 
-  console.log("UpdateRefereeRequest", UpdateRefereeRequestHistory);
+  console.log("Testing events", updateRefereeRequestHistory);
 
   // Event subscription hooks
   useScaffoldEventSubscriber({
@@ -157,8 +157,8 @@ const Home: NextPage = () => {
           challengeId: newChallengeId,
           team1,
           team2,
-          team1Result: parseInt(team1Result.toString()),
-          team2Result: parseInt(team2Result.toString()),
+          team1Result,
+          team2Result,
         };
         return [newChallenge, ...prev];
       });
@@ -177,7 +177,7 @@ const Home: NextPage = () => {
 
         const newChallenge: ChallengeCanceledProps = {
           challengeId: newChallengeId,
-          canceledBy: canceledBy.toString(),
+          canceledBy: canceledBy,
         };
         return [newChallenge, ...prev];
       });
@@ -230,7 +230,7 @@ const Home: NextPage = () => {
         team1: event.args[1],
         team2: event.args[2],
         referee: event.args[3],
-        bet: event.args[4],
+        bet: event.args[4].toString(),
       })) as ChallengeCreatedProps[];
       setChallengeHistory(mappedHistory);
     }
@@ -266,8 +266,8 @@ const Home: NextPage = () => {
         challengeId: event.args[0].toString(),
         team1: event.args[1],
         team2: event.args[2],
-        team1Result: event.args[3],
-        team2Result: event.args[4],
+        team1Result: event.args[3].toString(),
+        team2Result: event.args[4].toString(),
       })) as ChallengeResultProps[];
       setChallengeResultHistory(mappedHistory);
     }
@@ -277,7 +277,7 @@ const Home: NextPage = () => {
     if (ChallengeCanceledHistory) {
       const mappedHistory = ChallengeCanceledHistory.map(event => ({
         challengeId: event.args[0].toString(),
-        canceledBy: event.args[1].toString(),
+        canceledBy: event.args[1],
       })) as ChallengeCanceledProps[];
       setChallengeCanceledHistory(mappedHistory);
     }

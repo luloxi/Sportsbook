@@ -5,7 +5,7 @@ const contracts = {
       name: "localhost",
       contracts: {
         Sportsbook: {
-          address: "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+          address: "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853",
           abi: [
             {
               inputs: [],
@@ -531,35 +531,6 @@ const contracts = {
                   internalType: "address",
                   name: "",
                   type: "address",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "uint256",
-                  name: "_challengeId",
-                  type: "uint256",
-                },
-              ],
-              name: "viewUpdateRefereeRequest",
-              outputs: [
-                {
-                  internalType: "address",
-                  name: "proposingTeam",
-                  type: "address",
-                },
-                {
-                  internalType: "address",
-                  name: "newReferee",
-                  type: "address",
-                },
-                {
-                  internalType: "enum Sportsbook.UpdateRefereeState",
-                  name: "state",
-                  type: "uint8",
                 },
               ],
               stateMutability: "view",

@@ -147,6 +147,7 @@ contract Sportsbook {
         require(updateRefereeRequests[_challengeId].state == UpdateRefereeState.INACTIVE, "There's already a request!");
 
         updateRefereeRequests[_challengeId] = UpdateReferee(msg.sender, _newReferee, UpdateRefereeState.PENDING);
+        emit UpdateRefereeRequest(_challengeId, msg.sender, _newReferee);
     }
 
     function answerUpdateReferee(uint256 _challengeId, bool _choice) public {
@@ -161,6 +162,7 @@ contract Sportsbook {
         if (_choice == true) {
             matchChallenges[_challengeId].referee = updateRefereeRequests[_challengeId].newReferee;
         }
+        emit UpdateRefereeAccepted(_challengeId, updateRefereeRequests[_challengeId].newReferee);
     }
 
     function deleteChallenge(uint256 _challengeId) public {
@@ -212,16 +214,6 @@ contract Sportsbook {
 
     function viewMatchReferee(uint256 _id) public view returns (address) {
         return matchChallenges[_id].referee;
-    }
-
-    function viewUpdateRefereeRequest(uint256 _challengeId)
-        public
-        view
-        returns (address proposingTeam, address newReferee, UpdateRefereeState state)
-    {
-        proposingTeam = updateRefereeRequests[_challengeId].proposingTeam;
-        newReferee = updateRefereeRequests[_challengeId].newReferee;
-        state = updateRefereeRequests[_challengeId].state;
     }
 
     function viewRequestedReferee(uint256 _id) public view returns (address) {

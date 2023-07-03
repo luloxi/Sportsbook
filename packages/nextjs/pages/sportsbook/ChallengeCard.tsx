@@ -1,5 +1,4 @@
-import React from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Box, Button, Card, CardBody, Flex, Heading, Input, Stack, Text } from "@chakra-ui/react";
 import { Accordion, AccordionButton, AccordionIcon, AccordionItem, AccordionPanel } from "@chakra-ui/react";
 import { BigNumber, ethers } from "ethers";
@@ -21,6 +20,7 @@ const ChallengeCard = ({
   const [updateRefereeAddress, setUpdateRefereeAddress] = useState<string>("");
   const [completeChallengeTeam1Score, setCompleteChallengeTeam1Score] = useState<string>("");
   const [completeChallengeTeam2Score, setCompleteChallengeTeam2Score] = useState<string>("");
+  const [refereeAddress, setRefereeAddress] = useState(challenge.referee);
 
   const { address } = useAccount();
 
@@ -82,6 +82,14 @@ const ChallengeCard = ({
     functionName: "viewUpdateRefereeState",
     args: [challenge.challengeId ? BigNumber.from(challenge.challengeId) : undefined],
   });
+
+  useEffect(() => {
+    if (updateRefereeAccepted) {
+      setRefereeAddress(updateRefereeAccepted.newReferee);
+    } else {
+      setRefereeAddress(challenge.referee);
+    }
+  }, [updateRefereeAccepted, challenge.referee]);
 
   return (
     <div key={challenge.challengeId}>
@@ -170,12 +178,8 @@ const ChallengeCard = ({
                 </Text>
 
                 <Box className="flex items-center justify-center space-x-2">
-                  {updateRefereeAccepted ? (
-                    <Address address={updateRefereeAccepted.newReferee} />
-                  ) : (
-                    <Address address={challenge.referee} />
-                  )}
-                  <p>{challengeAccepted ? <>is</> : <>will be</>} the referee for the match</p>
+                  <Address address={refereeAddress} />
+                  <p>{challengeStarted ? <>is</> : <>will be</>} the referee for the match</p>
                 </Box>
               </>
             )}
