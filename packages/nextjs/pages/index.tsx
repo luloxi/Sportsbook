@@ -77,161 +77,6 @@ const Home: NextPage = () => {
     blockData: false,
   });
 
-  // Event subscription hooks
-  useScaffoldEventSubscriber({
-    contractName: "Sportsbook",
-    eventName: "ChallengeCreated",
-    listener: (challengeId, team1, team2, referee, bet) => {
-      setChallengeHistory(prev => {
-        const newChallengeId = parseInt(challengeId.toString());
-        if (prev.some(challenge => challenge.challengeId === newChallengeId)) {
-          return prev;
-        }
-
-        const newChallenge: ChallengeCreatedProps = {
-          challengeId: newChallengeId,
-          team1,
-          team2,
-          referee,
-          bet: parseInt(bet.toString()),
-        };
-        return [newChallenge, ...prev];
-      });
-    },
-  });
-
-  useScaffoldEventSubscriber({
-    contractName: "Sportsbook",
-    eventName: "ChallengeAccepted",
-    listener: (challengeId, team1, team2) => {
-      setChallengeAcceptedHistory(prev => {
-        const newChallengeId = parseInt(challengeId.toString());
-        if (prev.some(challenge => challenge.challengeId === newChallengeId)) {
-          return prev;
-        }
-
-        const newChallenge: ChallengeAcceptedProps = {
-          challengeId: newChallengeId,
-          team1,
-          team2,
-        };
-        return [newChallenge, ...prev];
-      });
-    },
-  });
-
-  useScaffoldEventSubscriber({
-    contractName: "Sportsbook",
-    eventName: "ChallengeStarted",
-    listener: (challengeId, referee, team1, team2) => {
-      setChallengeStartedHistory(prev => {
-        const newChallengeId = parseInt(challengeId.toString());
-        if (prev.some(challenge => challenge.challengeId === newChallengeId)) {
-          return prev;
-        }
-
-        const newChallenge: ChallengeStartedProps = {
-          challengeId: newChallengeId,
-          team1,
-          team2,
-          referee,
-        };
-        return [newChallenge, ...prev];
-      });
-    },
-  });
-
-  useScaffoldEventSubscriber({
-    contractName: "Sportsbook",
-    eventName: "ChallengeResult",
-    listener: (challengeId, team1, team2, team1Result, team2Result) => {
-      setChallengeResultHistory(prev => {
-        const newChallengeId = parseInt(challengeId.toString());
-        if (prev.some(challenge => challenge.challengeId === newChallengeId)) {
-          return prev;
-        }
-
-        const newChallenge: ChallengeResultProps = {
-          challengeId: newChallengeId,
-          team1,
-          team2,
-          team1Result,
-          team2Result,
-        };
-        return [newChallenge, ...prev];
-      });
-    },
-  });
-
-  useScaffoldEventSubscriber({
-    contractName: "Sportsbook",
-    eventName: "ChallengeCanceled",
-    listener: (challengeId, canceledBy) => {
-      setChallengeCanceledHistory(prev => {
-        const newChallengeId = parseInt(challengeId.toString());
-        if (prev.some(challenge => challenge.challengeId === newChallengeId)) {
-          return prev;
-        }
-
-        const newChallenge: ChallengeCanceledProps = {
-          challengeId: newChallengeId,
-          canceledBy: canceledBy,
-        };
-        return [newChallenge, ...prev];
-      });
-    },
-  });
-
-  const [, rerender] = useState<boolean>(false);
-
-  useScaffoldEventSubscriber({
-    contractName: "Sportsbook",
-    eventName: "UpdateRefereeRequest",
-    listener: (challengeId, proposingTeam, newReferee) => {
-      setUpdateRefereeRequestHistory(prevHistory => {
-        const newChallengeId = parseInt(challengeId.toString());
-        if (prevHistory[newChallengeId]) return prevHistory;
-        prevHistory[newChallengeId] = {
-          challengeId: newChallengeId,
-          properties: [
-            {
-              proposingTeam,
-              newReferee,
-            },
-          ],
-        };
-
-        return prevHistory;
-      });
-
-      rerender(p => !p);
-    },
-  });
-
-  useScaffoldEventSubscriber({
-    contractName: "Sportsbook",
-    eventName: "UpdateRefereeResponse",
-    listener: (challengeId, newReferee, updateAccepted) => {
-      setUpdateRefereeResponseHistory(prevHistory => {
-        const newChallengeId = parseInt(challengeId.toString());
-        if (prevHistory[newChallengeId]) return prevHistory;
-        prevHistory[newChallengeId] = {
-          challengeId: newChallengeId,
-          properties: [
-            {
-              newReferee,
-              updateAccepted,
-            },
-          ],
-        };
-
-        return prevHistory;
-      });
-
-      rerender(p => !p);
-    },
-  });
-
   // Event history hooks
   useEffect(() => {
     if (ChallengeCreatedHistory) {
@@ -296,7 +141,7 @@ const Home: NextPage = () => {
   useEffect(() => {
     if (UpdateRefereeRequestHistory) {
       const mappedHistory = UpdateRefereeRequestHistory.map(event => ({
-        challengeId: parseInt(event.args[0].toString()),
+        challengeId: event.args[0].toString(),
         properties: [
           {
             proposingTeam: event.args[1],
@@ -323,6 +168,161 @@ const Home: NextPage = () => {
     }
   }, [UpdateRefereeResponseHistory]);
 
+  // Event subscription hooks
+  useScaffoldEventSubscriber({
+    contractName: "Sportsbook",
+    eventName: "ChallengeCreated",
+    listener: (challengeId, team1, team2, referee, bet) => {
+      setChallengeHistory(previousHistory => {
+        const newChallengeId = parseInt(challengeId.toString());
+        if (previousHistory.some(challenge => challenge.challengeId === newChallengeId)) {
+          return previousHistory;
+        }
+
+        const newChallenge: ChallengeCreatedProps = {
+          challengeId: newChallengeId,
+          team1,
+          team2,
+          referee,
+          bet: parseInt(bet.toString()),
+        };
+        return [newChallenge, ...previousHistory];
+      });
+    },
+  });
+
+  useScaffoldEventSubscriber({
+    contractName: "Sportsbook",
+    eventName: "ChallengeAccepted",
+    listener: (challengeId, team1, team2) => {
+      setChallengeAcceptedHistory(previousHistory => {
+        const newChallengeId = parseInt(challengeId.toString());
+        if (previousHistory.some(challenge => challenge.challengeId === newChallengeId)) {
+          return previousHistory;
+        }
+
+        const newChallenge: ChallengeAcceptedProps = {
+          challengeId: newChallengeId,
+          team1,
+          team2,
+        };
+        return [newChallenge, ...previousHistory];
+      });
+    },
+  });
+
+  useScaffoldEventSubscriber({
+    contractName: "Sportsbook",
+    eventName: "ChallengeStarted",
+    listener: (challengeId, referee, team1, team2) => {
+      setChallengeStartedHistory(previousHistory => {
+        const newChallengeId = parseInt(challengeId.toString());
+        if (previousHistory.some(challenge => challenge.challengeId === newChallengeId)) {
+          return previousHistory;
+        }
+
+        const newChallenge: ChallengeStartedProps = {
+          challengeId: newChallengeId,
+          team1,
+          team2,
+          referee,
+        };
+        return [newChallenge, ...previousHistory];
+      });
+    },
+  });
+
+  useScaffoldEventSubscriber({
+    contractName: "Sportsbook",
+    eventName: "ChallengeResult",
+    listener: (challengeId, team1, team2, team1Result, team2Result) => {
+      setChallengeResultHistory(previousHistory => {
+        const newChallengeId = parseInt(challengeId.toString());
+        if (previousHistory.some(challenge => challenge.challengeId === newChallengeId)) {
+          return previousHistory;
+        }
+
+        const newChallenge: ChallengeResultProps = {
+          challengeId: newChallengeId,
+          team1,
+          team2,
+          team1Result,
+          team2Result,
+        };
+        return [newChallenge, ...previousHistory];
+      });
+    },
+  });
+
+  useScaffoldEventSubscriber({
+    contractName: "Sportsbook",
+    eventName: "ChallengeCanceled",
+    listener: (challengeId, canceledBy) => {
+      setChallengeCanceledHistory(previousHistory => {
+        const newChallengeId = parseInt(challengeId.toString());
+        if (previousHistory.some(challenge => challenge.challengeId === newChallengeId)) {
+          return previousHistory;
+        }
+
+        const newChallenge: ChallengeCanceledProps = {
+          challengeId: newChallengeId,
+          canceledBy: canceledBy,
+        };
+        return [newChallenge, ...previousHistory];
+      });
+    },
+  });
+
+  const [, rerender] = useState<boolean>(false);
+
+  useScaffoldEventSubscriber({
+    contractName: "Sportsbook",
+    eventName: "UpdateRefereeRequest",
+    listener: (challengeId, proposingTeam, newReferee) => {
+      setUpdateRefereeRequestHistory(previousHistory => {
+        const newChallengeId = parseInt(challengeId.toString());
+
+        const newChallenge: UpdateRefereeRequestProps = {
+          challengeId: newChallengeId,
+          properties: [
+            {
+              proposingTeam,
+              newReferee,
+            },
+          ],
+        };
+
+        return [newChallenge, ...previousHistory];
+      });
+
+      rerender(p => !p);
+    },
+  });
+
+  useScaffoldEventSubscriber({
+    contractName: "Sportsbook",
+    eventName: "UpdateRefereeResponse",
+    listener: (challengeId, newReferee, updateAccepted) => {
+      setUpdateRefereeResponseHistory(previousHistory => {
+        const newChallengeId = parseInt(challengeId.toString());
+
+        const newChallenge: UpdateRefereeResponseProps = {
+          challengeId: newChallengeId,
+          properties: [
+            {
+              newReferee,
+              updateAccepted,
+            },
+          ],
+        };
+
+        return [newChallenge, ...previousHistory];
+      });
+
+      rerender(p => !p);
+    },
+  });
+
   const challengeCards = challengeHistory?.map(challenge => {
     const challengeCanceled = challengeCanceledHistory.find(cancel => cancel.challengeId === challenge.challengeId);
     const challengeAccepted = challengeAcceptedHistory.find(result => result.challengeId === challenge.challengeId);
@@ -343,16 +343,14 @@ const Home: NextPage = () => {
     const newestRequest = updateRefereeRequests
       .filter(request => request.challengeId.toString() === challenge.challengeId.toString())
       .map(response => response.properties.find(event => event.newReferee))
+      .reverse()
       .pop();
-
-    console.log("Newest request", newestRequest);
 
     const lastAcceptedResponse = updateRefereeResponses
       .filter(response => response.challengeId.toString() === challenge.challengeId.toString())
       .map(response => response.properties.find(event => event.updateAccepted))
+      .reverse()
       .pop();
-
-    console.log("lastAcceptedResponse", lastAcceptedResponse);
 
     const eventToShow =
       updateRefereeRequests.filter(request => request.challengeId.toString() === challenge.challengeId.toString())
