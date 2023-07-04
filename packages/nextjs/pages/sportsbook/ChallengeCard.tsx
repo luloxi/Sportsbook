@@ -17,39 +17,38 @@ const ChallengeCard = ({
   updateRefereeRequest,
   updateRefereeAccepted,
 }: ChallengeCardProps) => {
+  const [refereeAddress, setRefereeAddress] = useState(challenge.referee);
   const [updateRefereeAddress, setUpdateRefereeAddress] = useState<string>("");
+  const [updateRefereeResponse, setUpdateRefereeResponse] = useState<boolean | undefined>(undefined);
   const [completeChallengeTeam1Score, setCompleteChallengeTeam1Score] = useState<string>("");
   const [completeChallengeTeam2Score, setCompleteChallengeTeam2Score] = useState<string>("");
-  const [refereeAddress, setRefereeAddress] = useState(challenge.referee);
-
-  const [challengeIdArg, setChallengeIdArg] = useState<string>(challenge.challengeId.toString());
 
   const { address } = useAccount();
 
   const { writeAsync: acceptChallenge } = useScaffoldContractWrite({
     contractName: "Sportsbook",
     functionName: "acceptChallenge",
-    args: [challengeIdArg ? BigNumber.from(challengeIdArg) : BigNumber.from(0)],
+    args: [challenge.challengeId.toString() ? BigNumber.from(challenge.challengeId.toString()) : BigNumber.from(0)],
     value: challenge.bet ? ethers.utils.formatEther(challenge.bet.toString()) : undefined,
   });
 
   const { writeAsync: deleteChallenge } = useScaffoldContractWrite({
     contractName: "Sportsbook",
     functionName: "deleteChallenge",
-    args: [challengeIdArg ? BigNumber.from(challengeIdArg) : BigNumber.from(0)],
+    args: [challenge.challengeId.toString() ? BigNumber.from(challenge.challengeId.toString()) : BigNumber.from(0)],
   });
 
   const { writeAsync: startChallenge } = useScaffoldContractWrite({
     contractName: "Sportsbook",
     functionName: "startChallenge",
-    args: [challengeIdArg ? BigNumber.from(challengeIdArg) : undefined],
+    args: [challenge.challengeId.toString() ? BigNumber.from(challenge.challengeId.toString()) : undefined],
   });
 
   const { writeAsync: completeChallenge } = useScaffoldContractWrite({
     contractName: "Sportsbook",
     functionName: "completeChallenge",
     args: [
-      challengeIdArg ? BigNumber.from(challengeIdArg) : undefined,
+      challenge.challengeId.toString() ? BigNumber.from(challenge.challengeId.toString()) : undefined,
       completeChallengeTeam1Score ? parseInt(completeChallengeTeam1Score) : undefined,
       completeChallengeTeam2Score ? parseInt(completeChallengeTeam2Score) : undefined,
     ],
@@ -58,19 +57,19 @@ const ChallengeCard = ({
   const { writeAsync: updateReferee } = useScaffoldContractWrite({
     contractName: "Sportsbook",
     functionName: "updateReferee",
-    args: [challengeIdArg ? BigNumber.from(challengeIdArg) : undefined, updateRefereeAddress],
+    args: [
+      challenge.challengeId.toString() ? BigNumber.from(challenge.challengeId.toString()) : undefined,
+      updateRefereeAddress,
+    ],
   });
 
-  const { writeAsync: answerNoToUpdateReferee } = useScaffoldContractWrite({
+  const { writeAsync: answerToUpdateReferee } = useScaffoldContractWrite({
     contractName: "Sportsbook",
     functionName: "answerUpdateReferee",
-    args: [challengeIdArg ? BigNumber.from(challengeIdArg) : undefined, false],
-  });
-
-  const { writeAsync: answerYesToUpdateReferee } = useScaffoldContractWrite({
-    contractName: "Sportsbook",
-    functionName: "answerUpdateReferee",
-    args: [challengeIdArg ? BigNumber.from(challengeIdArg) : undefined, true],
+    args: [
+      challenge.challengeId.toString() ? BigNumber.from(challenge.challengeId.toString()) : undefined,
+      updateRefereeResponse,
+    ],
   });
 
   useEffect(() => {
@@ -79,11 +78,7 @@ const ChallengeCard = ({
     } else {
       setRefereeAddress(challenge.referee);
     }
-  }, [updateRefereeAccepted, challenge.referee]);
-
-  if (challenge && challenge.challengeId && challengeIdArg != challenge.challengeId.toString()) {
-    setChallengeIdArg(challenge.challengeId.toString());
-  }
+  }, [updateRefereeAccepted]);
 
   return (
     <div key={challenge.challengeId}>
@@ -294,13 +289,23 @@ const ChallengeCard = ({
                         {updateRefereeRequest?.proposingTeam != address && (
                           <Flex justifyContent={"space-around"}>
                             <Button
-                              onClick={answerYesToUpdateReferee}
+                              onClick={() => {
+                                setUpdateRefereeResponse(true);
+                                answerToUpdateReferee();
+                              }}
                               backgroundColor={"green.500"}
                               textColor={"white"}
                             >
                               Accept new referee
                             </Button>
-                            <Button onClick={answerNoToUpdateReferee} backgroundColor={"red.500"} textColor={"white"}>
+                            <Button
+                              onClick={() => {
+                                setUpdateRefereeResponse(false);
+                                answerToUpdateReferee();
+                              }}
+                              backgroundColor={"red.500"}
+                              textColor={"white"}
+                            >
                               Decline proposal
                             </Button>
                           </Flex>

@@ -134,7 +134,7 @@ const Home: NextPage = () => {
         challengeId: event.args[0].toString(),
         proposingTeam: event.args[1],
         newReferee: event.args[2],
-      }));
+      })) as UpdateRefereeRequestProps[];
       setUpdateRefereeRequestHistory(mappedHistory);
     }
   }, [UpdateRefereeRequestHistory]);
@@ -145,7 +145,7 @@ const Home: NextPage = () => {
         challengeId: event.args[0].toString(),
         newReferee: event.args[1],
         updateAccepted: event.args[2],
-      }));
+      })) as UpdateRefereeResponseProps[];
       setUpdateRefereeResponseHistory(mappedHistory);
     }
   }, [UpdateRefereeResponseHistory]);
@@ -155,21 +155,15 @@ const Home: NextPage = () => {
     contractName: "Sportsbook",
     eventName: "ChallengeCreated",
     listener: (challengeId, team1, team2, referee, bet) => {
-      setChallengeHistory(previousHistory => {
-        const newChallengeId = parseInt(challengeId.toString());
-        if (previousHistory.some(challenge => challenge.challengeId === newChallengeId)) {
-          return previousHistory;
-        }
-
-        const newChallenge: ChallengeCreatedProps = {
-          challengeId: newChallengeId,
+      setChallengeHistory(indexedHistory => {
+        const newChallengeCreated: ChallengeCreatedProps = {
+          challengeId: parseInt(challengeId.toString()),
           team1,
           team2,
           referee,
           bet: parseInt(bet.toString()),
         };
-
-        return [newChallenge, ...previousHistory];
+        return [newChallengeCreated, ...indexedHistory];
       });
     },
   });
@@ -178,19 +172,13 @@ const Home: NextPage = () => {
     contractName: "Sportsbook",
     eventName: "ChallengeAccepted",
     listener: (challengeId, team1, team2) => {
-      setChallengeAcceptedHistory(previousHistory => {
-        const newChallengeId = parseInt(challengeId.toString());
-        if (previousHistory.some(challenge => challenge.challengeId === newChallengeId)) {
-          return previousHistory;
-        }
-
-        const newChallenge: ChallengeAcceptedProps = {
-          challengeId: newChallengeId,
+      setChallengeAcceptedHistory(indexedHistory => {
+        const newChallengeAccepted: ChallengeAcceptedProps = {
+          challengeId: parseInt(challengeId.toString()),
           team1,
           team2,
         };
-
-        return [newChallenge, ...previousHistory];
+        return [newChallengeAccepted, ...indexedHistory];
       });
     },
   });
@@ -199,20 +187,14 @@ const Home: NextPage = () => {
     contractName: "Sportsbook",
     eventName: "ChallengeStarted",
     listener: (challengeId, referee, team1, team2) => {
-      setChallengeStartedHistory(previousHistory => {
-        const newChallengeId = parseInt(challengeId.toString());
-        if (previousHistory.some(challenge => challenge.challengeId === newChallengeId)) {
-          return previousHistory;
-        }
-
-        const newChallenge: ChallengeStartedProps = {
-          challengeId: newChallengeId,
+      setChallengeStartedHistory(indexedHistory => {
+        const newChallengeStarted: ChallengeStartedProps = {
+          challengeId: parseInt(challengeId.toString()),
           team1,
           team2,
           referee,
         };
-
-        return [newChallenge, ...previousHistory];
+        return [newChallengeStarted, ...indexedHistory];
       });
     },
   });
@@ -221,21 +203,15 @@ const Home: NextPage = () => {
     contractName: "Sportsbook",
     eventName: "ChallengeResult",
     listener: (challengeId, team1, team2, team1Result, team2Result) => {
-      setChallengeResultHistory(previousHistory => {
-        const newChallengeId = parseInt(challengeId.toString());
-        if (previousHistory.some(challenge => challenge.challengeId === newChallengeId)) {
-          return previousHistory;
-        }
-
-        const newChallenge: ChallengeResultProps = {
-          challengeId: newChallengeId,
+      setChallengeResultHistory(indexedHistory => {
+        const newChallengeResult: ChallengeResultProps = {
+          challengeId: parseInt(challengeId.toString()),
           team1,
           team2,
           team1Result,
           team2Result,
         };
-
-        return [newChallenge, ...previousHistory];
+        return [newChallengeResult, ...indexedHistory];
       });
     },
   });
@@ -244,18 +220,12 @@ const Home: NextPage = () => {
     contractName: "Sportsbook",
     eventName: "ChallengeCanceled",
     listener: (challengeId, canceledBy) => {
-      setChallengeCanceledHistory(previousHistory => {
-        const newChallengeId = parseInt(challengeId.toString());
-        if (previousHistory.some(challenge => challenge.challengeId === newChallengeId)) {
-          return previousHistory;
-        }
-
-        const newChallenge: ChallengeCanceledProps = {
-          challengeId: newChallengeId,
+      setChallengeCanceledHistory(indexedHistory => {
+        const newChallengeCanceled: ChallengeCanceledProps = {
+          challengeId: parseInt(challengeId.toString()),
           canceledBy: canceledBy,
         };
-
-        return [newChallenge, ...previousHistory];
+        return [newChallengeCanceled, ...indexedHistory];
       });
     },
   });
@@ -264,13 +234,13 @@ const Home: NextPage = () => {
     contractName: "Sportsbook",
     eventName: "UpdateRefereeRequest",
     listener: (challengeId, proposingTeam, newReferee) => {
-      setUpdateRefereeRequestHistory(previousHistory => {
-        const newChallenge: UpdateRefereeRequestProps = {
+      setUpdateRefereeRequestHistory(indexedHistory => {
+        const newUpdateRefereeRequest: UpdateRefereeRequestProps = {
           challengeId: parseInt(challengeId.toString()),
           proposingTeam,
           newReferee,
         };
-        return [newChallenge, ...previousHistory];
+        return [newUpdateRefereeRequest, ...indexedHistory];
       });
     },
   });
@@ -279,13 +249,13 @@ const Home: NextPage = () => {
     contractName: "Sportsbook",
     eventName: "UpdateRefereeResponse",
     listener: (challengeId, newReferee, updateAccepted) => {
-      setUpdateRefereeResponseHistory(previousHistory => {
-        const newChallenge: UpdateRefereeResponseProps = {
+      setUpdateRefereeResponseHistory(indexedHistory => {
+        const newUpdateRefereeResponse: UpdateRefereeResponseProps = {
           challengeId: parseInt(challengeId.toString()),
           newReferee,
           updateAccepted,
         };
-        return [newChallenge, ...previousHistory];
+        return [newUpdateRefereeResponse, ...indexedHistory];
       });
     },
   });
