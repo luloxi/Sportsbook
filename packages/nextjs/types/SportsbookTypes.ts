@@ -34,26 +34,12 @@ export type ChallengeCanceledProps = {
 
 export type UpdateRefereeRequestProps = {
   challengeId: number;
-  properties: {
-    proposingTeam: string;
-    newReferee: string;
-  }[];
-};
-
-export type UpdateRefereeResponseProps = {
-  challengeId: number;
-  properties: {
-    newReferee: string;
-    updateAccepted: boolean;
-  }[];
-};
-
-export type UpdateRefereeRequestMinimalProps = {
   proposingTeam: string;
   newReferee: string;
 };
 
-export type UpdateRefereeAcceptedProps = {
+export type UpdateRefereeResponseProps = {
+  challengeId: number;
   newReferee: string;
   updateAccepted: boolean;
 };
@@ -64,6 +50,6 @@ export type ChallengeCardProps = {
   challengeStarted?: ChallengeStartedProps;
   challengeResult?: ChallengeResultProps;
   challengeCanceled?: ChallengeCanceledProps;
-  updateRefereeRequest?: UpdateRefereeRequestMinimalProps;
-  updateRefereeAccepted?: UpdateRefereeAcceptedProps;
+  updateRefereeRequest?: UpdateRefereeRequestProps;
+  updateRefereeAccepted?: UpdateRefereeResponseProps;
 };

@@ -79,75 +79,61 @@ const Home: NextPage = () => {
 
   // Event history hooks
   useEffect(() => {
-    if (ChallengeCreatedHistory) {
-      const mappedHistory = ChallengeCreatedHistory.map(event => ({
-        challengeId: event.args[0].toString(),
-        team1: event.args[1],
-        team2: event.args[2],
-        referee: event.args[3],
-        bet: event.args[4].toString(),
-      })) as ChallengeCreatedProps[];
-      setChallengeHistory(mappedHistory);
-    }
+    const mappedHistory = ChallengeCreatedHistory?.map(event => ({
+      challengeId: event.args[0].toString(),
+      team1: event.args[1],
+      team2: event.args[2],
+      referee: event.args[3],
+      bet: event.args[4].toString(),
+    })) as ChallengeCreatedProps[];
+    setChallengeHistory(mappedHistory);
   }, [ChallengeCreatedHistory]);
 
   useEffect(() => {
-    if (ChallengeAcceptedHistory) {
-      const mappedHistory = ChallengeAcceptedHistory.map(event => ({
-        challengeId: event.args[0].toString(),
-        team1: event.args[1],
-        team2: event.args[2],
-        referee: event.args[3],
-      })) as ChallengeAcceptedProps[];
-      setChallengeAcceptedHistory(mappedHistory);
-    }
+    const mappedHistory = ChallengeAcceptedHistory?.map(event => ({
+      challengeId: event.args[0].toString(),
+      team1: event.args[1],
+      team2: event.args[2],
+      referee: event.args[3],
+    })) as ChallengeAcceptedProps[];
+    setChallengeAcceptedHistory(mappedHistory);
   }, [ChallengeAcceptedHistory]);
 
   useEffect(() => {
-    if (ChallengeStartedHistory) {
-      const mappedHistory = ChallengeStartedHistory.map(event => ({
-        challengeId: event.args[0].toString(),
-        referee: event.args[1],
-        team1: event.args[2],
-        team2: event.args[3],
-      })) as ChallengeStartedProps[];
-      setChallengeStartedHistory(mappedHistory);
-    }
+    const mappedHistory = ChallengeStartedHistory?.map(event => ({
+      challengeId: event.args[0].toString(),
+      referee: event.args[1],
+      team1: event.args[2],
+      team2: event.args[3],
+    })) as ChallengeStartedProps[];
+    setChallengeStartedHistory(mappedHistory);
   }, [ChallengeStartedHistory]);
 
   useEffect(() => {
-    if (ChallengeResultHistory) {
-      const mappedHistory = ChallengeResultHistory.map(event => ({
-        challengeId: event.args[0].toString(),
-        team1: event.args[1],
-        team2: event.args[2],
-        team1Result: event.args[3].toString(),
-        team2Result: event.args[4].toString(),
-      })) as ChallengeResultProps[];
-      setChallengeResultHistory(mappedHistory);
-    }
+    const mappedHistory = ChallengeResultHistory?.map(event => ({
+      challengeId: event.args[0].toString(),
+      team1: event.args[1],
+      team2: event.args[2],
+      team1Result: event.args[3].toString(),
+      team2Result: event.args[4].toString(),
+    })) as ChallengeResultProps[];
+    setChallengeResultHistory(mappedHistory);
   }, [ChallengeResultHistory]);
 
   useEffect(() => {
-    if (ChallengeCanceledHistory) {
-      const mappedHistory = ChallengeCanceledHistory.map(event => ({
-        challengeId: event.args[0].toString(),
-        canceledBy: event.args[1],
-      })) as ChallengeCanceledProps[];
-      setChallengeCanceledHistory(mappedHistory);
-    }
+    const mappedHistory = ChallengeCanceledHistory?.map(event => ({
+      challengeId: event.args[0].toString(),
+      canceledBy: event.args[1],
+    })) as ChallengeCanceledProps[];
+    setChallengeCanceledHistory(mappedHistory);
   }, [ChallengeCanceledHistory]);
 
   useEffect(() => {
     if (UpdateRefereeRequestHistory) {
       const mappedHistory = UpdateRefereeRequestHistory.map(event => ({
         challengeId: event.args[0].toString(),
-        properties: [
-          {
-            proposingTeam: event.args[1],
-            newReferee: event.args[2],
-          },
-        ],
+        proposingTeam: event.args[1],
+        newReferee: event.args[2],
       }));
       setUpdateRefereeRequestHistory(mappedHistory);
     }
@@ -157,12 +143,8 @@ const Home: NextPage = () => {
     if (UpdateRefereeResponseHistory) {
       const mappedHistory = UpdateRefereeResponseHistory.map(event => ({
         challengeId: event.args[0].toString(),
-        properties: [
-          {
-            newReferee: event.args[1],
-            updateAccepted: event.args[2],
-          },
-        ],
+        newReferee: event.args[1],
+        updateAccepted: event.args[2],
       }));
       setUpdateRefereeResponseHistory(mappedHistory);
     }
@@ -186,6 +168,7 @@ const Home: NextPage = () => {
           referee,
           bet: parseInt(bet.toString()),
         };
+
         return [newChallenge, ...previousHistory];
       });
     },
@@ -206,6 +189,7 @@ const Home: NextPage = () => {
           team1,
           team2,
         };
+
         return [newChallenge, ...previousHistory];
       });
     },
@@ -227,6 +211,7 @@ const Home: NextPage = () => {
           team2,
           referee,
         };
+
         return [newChallenge, ...previousHistory];
       });
     },
@@ -249,6 +234,7 @@ const Home: NextPage = () => {
           team1Result,
           team2Result,
         };
+
         return [newChallenge, ...previousHistory];
       });
     },
@@ -268,6 +254,7 @@ const Home: NextPage = () => {
           challengeId: newChallengeId,
           canceledBy: canceledBy,
         };
+
         return [newChallenge, ...previousHistory];
       });
     },
@@ -278,18 +265,11 @@ const Home: NextPage = () => {
     eventName: "UpdateRefereeRequest",
     listener: (challengeId, proposingTeam, newReferee) => {
       setUpdateRefereeRequestHistory(previousHistory => {
-        const newChallengeId = parseInt(challengeId.toString());
-
         const newChallenge: UpdateRefereeRequestProps = {
-          challengeId: newChallengeId,
-          properties: [
-            {
-              proposingTeam,
-              newReferee,
-            },
-          ],
+          challengeId: parseInt(challengeId.toString()),
+          proposingTeam,
+          newReferee,
         };
-
         return [newChallenge, ...previousHistory];
       });
     },
@@ -300,45 +280,39 @@ const Home: NextPage = () => {
     eventName: "UpdateRefereeResponse",
     listener: (challengeId, newReferee, updateAccepted) => {
       setUpdateRefereeResponseHistory(previousHistory => {
-        const newChallengeId = parseInt(challengeId.toString());
-
         const newChallenge: UpdateRefereeResponseProps = {
-          challengeId: newChallengeId,
-          properties: [
-            {
-              newReferee,
-              updateAccepted,
-            },
-          ],
+          challengeId: parseInt(challengeId.toString()),
+          newReferee,
+          updateAccepted,
         };
-
         return [newChallenge, ...previousHistory];
       });
     },
   });
 
   const challengeCards = challengeHistory?.map(challenge => {
-    const challengeCanceled = challengeCanceledHistory.find(canceled => canceled.challengeId === challenge.challengeId);
-    const challengeAccepted = challengeAcceptedHistory.find(accepted => accepted.challengeId === challenge.challengeId);
-    const challengeStarted = challengeStartedHistory.find(started => started.challengeId === challenge.challengeId);
-    const challengeResult = challengeResultHistory.find(result => result.challengeId === challenge.challengeId);
-
-    const updateRefereeRequests = updateRefereeRequestHistory.filter(
-      request => request && request.challengeId.toString() === challenge.challengeId.toString(),
+    const challengeAccepted = challengeAcceptedHistory?.find(
+      accepted => accepted.challengeId === challenge.challengeId,
     );
-    const updateRefereeResponses = updateRefereeResponseHistory.filter(
-      response => response && response.challengeId.toString() === challenge.challengeId.toString(),
+    const challengeStarted = challengeStartedHistory?.find(started => started.challengeId === challenge.challengeId);
+    const challengeResult = challengeResultHistory?.find(result => result.challengeId === challenge.challengeId);
+    const challengeCanceled = challengeCanceledHistory?.find(
+      canceled => canceled.challengeId === challenge.challengeId,
+    );
+    const updateRefereeRequests = updateRefereeRequestHistory?.filter(
+      request => request.challengeId.toString() === challenge.challengeId.toString(),
+    );
+    const updateRefereeResponses = updateRefereeResponseHistory?.filter(
+      response => response.challengeId.toString() === challenge.challengeId.toString(),
     );
 
-    const newestRequest = updateRefereeRequests
+    const newestUpdateRequest = updateRefereeRequests
       .filter(request => request.challengeId.toString() === challenge.challengeId.toString())
-      .map(response => response.properties.find(event => event.newReferee))
       .reverse()
       .pop();
 
-    const lastAcceptedResponse = updateRefereeResponses
+    const newestAcceptedResponse = updateRefereeResponses
       .filter(response => response.challengeId.toString() === challenge.challengeId.toString())
-      .map(response => response.properties.find(event => event.updateAccepted))
       .reverse()
       .pop();
 
@@ -352,11 +326,11 @@ const Home: NextPage = () => {
         updateRefereeResponses.filter(response => response.challengeId.toString() === challenge.challengeId.toString())
           .length
         ? {
-            response: lastAcceptedResponse ? lastAcceptedResponse : undefined,
+            response: newestAcceptedResponse,
           }
         : {
-            request: newestRequest ? newestRequest : undefined,
-            response: lastAcceptedResponse ? lastAcceptedResponse : undefined,
+            request: newestUpdateRequest,
+            response: newestAcceptedResponse,
           };
 
     return {
@@ -410,7 +384,7 @@ const Home: NextPage = () => {
               <CardBody>
                 <Heading size="xl">🏀 See your active challenges! ⚽</Heading>
                 <Flex direction="column" alignItems="center" justifyContent="center">
-                  {challengeCards.map(
+                  {challengeCards?.map(
                     ({
                       challenge,
                       challengeAccepted,
