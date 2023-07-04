@@ -70,8 +70,6 @@ contract Sportsbook {
     event UpdateRefereeRequest(uint256 indexed challengeId, address indexed proposingTeam, address indexed newReferee);
     event UpdateRefereeResponse(uint256 indexed challengeId, address indexed newReferee, bool updateAccepted);
 
-    constructor() {}
-
     function createChallenge(address _team2, address referee) public payable {
         matchChallenges.push(MatchChallenge(msg.sender, _team2, MatchState.PENDING, msg.value, referee));
         emit ChallengeCreated(matchChallenges.length - 1, msg.sender, _team2, referee, msg.value);

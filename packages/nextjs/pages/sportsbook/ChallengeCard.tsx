@@ -78,7 +78,7 @@ const ChallengeCard = ({
     } else {
       setRefereeAddress(challenge.referee);
     }
-  }, [updateRefereeAccepted]);
+  }, [updateRefereeAccepted, challenge.referee]);
 
   return (
     <div key={challenge.challengeId}>
