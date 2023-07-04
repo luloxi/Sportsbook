@@ -273,8 +273,6 @@ const Home: NextPage = () => {
     },
   });
 
-  const [, rerender] = useState<boolean>(false);
-
   useScaffoldEventSubscriber({
     contractName: "Sportsbook",
     eventName: "UpdateRefereeRequest",
@@ -294,8 +292,6 @@ const Home: NextPage = () => {
 
         return [newChallenge, ...previousHistory];
       });
-
-      rerender(p => !p);
     },
   });
 
@@ -318,27 +314,21 @@ const Home: NextPage = () => {
 
         return [newChallenge, ...previousHistory];
       });
-
-      rerender(p => !p);
     },
   });
 
   const challengeCards = challengeHistory?.map(challenge => {
-    const challengeCanceled = challengeCanceledHistory.find(cancel => cancel.challengeId === challenge.challengeId);
-    const challengeAccepted = challengeAcceptedHistory.find(result => result.challengeId === challenge.challengeId);
-    const challengeStarted = challengeStartedHistory.find(result => result.challengeId === challenge.challengeId);
+    const challengeCanceled = challengeCanceledHistory.find(canceled => canceled.challengeId === challenge.challengeId);
+    const challengeAccepted = challengeAcceptedHistory.find(accepted => accepted.challengeId === challenge.challengeId);
+    const challengeStarted = challengeStartedHistory.find(started => started.challengeId === challenge.challengeId);
     const challengeResult = challengeResultHistory.find(result => result.challengeId === challenge.challengeId);
 
-    const updateRefereeRequests = Array.isArray(updateRefereeRequestHistory)
-      ? updateRefereeRequestHistory.filter(
-          request => request && request.challengeId.toString() === challenge.challengeId.toString(),
-        )
-      : [];
-    const updateRefereeResponses = Array.isArray(updateRefereeResponseHistory)
-      ? updateRefereeResponseHistory.filter(
-          response => response && response.challengeId.toString() === challenge.challengeId.toString(),
-        )
-      : [];
+    const updateRefereeRequests = updateRefereeRequestHistory.filter(
+      request => request && request.challengeId.toString() === challenge.challengeId.toString(),
+    );
+    const updateRefereeResponses = updateRefereeResponseHistory.filter(
+      response => response && response.challengeId.toString() === challenge.challengeId.toString(),
+    );
 
     const newestRequest = updateRefereeRequests
       .filter(request => request.challengeId.toString() === challenge.challengeId.toString())
