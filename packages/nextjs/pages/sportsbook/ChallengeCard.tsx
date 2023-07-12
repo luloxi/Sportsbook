@@ -19,7 +19,6 @@ const ChallengeCard = ({
 }: ChallengeCardProps) => {
   const [refereeAddress, setRefereeAddress] = useState(challenge.referee);
   const [updateRefereeAddress, setUpdateRefereeAddress] = useState<string>("");
-  const [updateRefereeResponse, setUpdateRefereeResponse] = useState<boolean | undefined>(undefined);
   const [completeChallengeTeam1Score, setCompleteChallengeTeam1Score] = useState<string>("");
   const [completeChallengeTeam2Score, setCompleteChallengeTeam2Score] = useState<string>("");
 
@@ -63,13 +62,16 @@ const ChallengeCard = ({
     ],
   });
 
-  const { writeAsync: answerToUpdateReferee } = useScaffoldContractWrite({
+  const { writeAsync: answerYesToUpdateReferee } = useScaffoldContractWrite({
     contractName: "Sportsbook",
     functionName: "answerUpdateReferee",
-    args: [
-      challenge.challengeId.toString() ? BigNumber.from(challenge.challengeId.toString()) : undefined,
-      updateRefereeResponse,
-    ],
+    args: [challenge.challengeId.toString() ? BigNumber.from(challenge.challengeId.toString()) : undefined, true],
+  });
+
+  const { writeAsync: answerNoToUpdateReferee } = useScaffoldContractWrite({
+    contractName: "Sportsbook",
+    functionName: "answerUpdateReferee",
+    args: [challenge.challengeId.toString() ? BigNumber.from(challenge.challengeId.toString()) : undefined, false],
   });
 
   useEffect(() => {
@@ -290,8 +292,7 @@ const ChallengeCard = ({
                           <Flex justifyContent={"space-around"}>
                             <Button
                               onClick={() => {
-                                setUpdateRefereeResponse(true);
-                                answerToUpdateReferee();
+                                answerYesToUpdateReferee();
                               }}
                               backgroundColor={"green.500"}
                               textColor={"white"}
@@ -300,8 +301,7 @@ const ChallengeCard = ({
                             </Button>
                             <Button
                               onClick={() => {
-                                setUpdateRefereeResponse(false);
-                                answerToUpdateReferee();
+                                answerNoToUpdateReferee();
                               }}
                               backgroundColor={"red.500"}
                               textColor={"white"}
