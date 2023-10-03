@@ -47,6 +47,10 @@ contract Sportsbook {
         MatchState state;
         uint256 bet;
         address referee;
+        uint8 team1Result;
+        uint8 team2Result;
+        bool team1Withdrawn; // Indicates whether team 1 has withdrawn or not
+        bool team2Withdrawn; // Indicates whether team 2 has withdrawn or not
     }
 
     struct UpdateReferee {
@@ -67,11 +71,14 @@ contract Sportsbook {
         uint256 indexed challengeId, address indexed team1, address indexed team2, uint8 team1Result, uint8 team2Result
     );
     event ChallengeCanceled(uint256 indexed challengeId, address indexed canceledBy);
+    event PrizeWithdrawn(uint256 indexed challengeId, address indexed team, uint256 amount);
     event UpdateRefereeRequest(uint256 indexed challengeId, address indexed proposingTeam, address indexed newReferee);
     event UpdateRefereeResponse(uint256 indexed challengeId, address indexed newReferee, bool updateAccepted);
 
     function createChallenge(address _team2, address referee) public payable {
-        matchChallenges.push(MatchChallenge(msg.sender, _team2, MatchState.PENDING, msg.value, referee));
+        matchChallenges.push(
+            MatchChallenge(msg.sender, _team2, MatchState.PENDING, msg.value, referee, 0, 0, false, false)
+        );
         emit ChallengeCreated(matchChallenges.length - 1, msg.sender, _team2, referee, msg.value);
     }
 
@@ -102,34 +109,54 @@ contract Sportsbook {
         require(matchChallenges[_challengeId].state == MatchState.STARTED, "Challenge hasn't started!");
         require(matchChallenges[_challengeId].team2 != address(0), "There must be a team2!");
         require(msg.sender == matchChallenges[_challengeId].referee, "You must be the referee to say who won");
+
         // Effect
+        matchChallenges[_challengeId].team1Result = _team1Result;
+        matchChallenges[_challengeId].team2Result = _team2Result;
         matchChallenges[_challengeId].state = MatchState.FINISHED;
         emit ChallengeResult(
             _challengeId,
             matchChallenges[_challengeId].team1,
-            matchChallenges[_challengeId].team1,
+            matchChallenges[_challengeId].team2,
             _team1Result,
             _team2Result
         );
-        // Interact
-        if (_team1Result > _team2Result) {
-            (bool success,) =
-                payable(matchChallenges[_challengeId].team1).call{value: matchChallenges[_challengeId].bet * 2}("");
-            require(success, "Sportsbook: Transfer to team1 failed.");
+    }
+
+    function withdrawPrize(uint256 _challengeId) public {
+        require(matchChallenges[_challengeId].state == MatchState.FINISHED, "Challenge has not been completed yet.");
+        require(
+            msg.sender == matchChallenges[_challengeId].team1 || msg.sender == matchChallenges[_challengeId].team2,
+            "You are not a participant in this challenge."
+        );
+
+        uint8 team1Result = matchChallenges[_challengeId].team1Result;
+        uint8 team2Result = matchChallenges[_challengeId].team2Result;
+
+        // Determine the winner or if it's a tie
+        if (team1Result > team2Result) {
+            require(msg.sender == matchChallenges[_challengeId].team1, "You are not the winning team.");
+        } else if (team1Result < team2Result) {
+            require(msg.sender == matchChallenges[_challengeId].team2, "You are not the winning team.");
+        } else {
+            // It's a tie
+            if (msg.sender == matchChallenges[_challengeId].team1) {
+                require(!matchChallenges[_challengeId].team1Withdrawn, "You have already withdrawn your share.");
+                matchChallenges[_challengeId].team1Withdrawn = true;
+            } else {
+                require(!matchChallenges[_challengeId].team2Withdrawn, "You have already withdrawn your share.");
+                matchChallenges[_challengeId].team2Withdrawn = true;
+            }
+            (bool successTie,) = payable(msg.sender).call{value: matchChallenges[_challengeId].bet / 2}("");
+            require(successTie, "Transfer failed.");
+            emit PrizeWithdrawn(_challengeId, msg.sender, matchChallenges[_challengeId].bet / 2);
+            return;
         }
-        if (_team1Result < _team2Result) {
-            (bool success,) =
-                payable(matchChallenges[_challengeId].team2).call{value: matchChallenges[_challengeId].bet * 2}("");
-            require(success, "Sportsbook: Transfer to team2 failed.");
-        }
-        if (_team1Result == _team2Result) {
-            (bool success,) =
-                payable(matchChallenges[_challengeId].team1).call{value: matchChallenges[_challengeId].bet}("");
-            (bool success2,) =
-                payable(matchChallenges[_challengeId].team2).call{value: matchChallenges[_challengeId].bet}("");
-            require(success, "Sportsbook: Transfer to team1 failed.");
-            require(success2, "Sportsbook: Transfer to team2 failed.");
-        }
+
+        // For non-tie scenario, perform the transfer
+        (bool success,) = payable(msg.sender).call{value: matchChallenges[_challengeId].bet * 2}("");
+        require(success, "Transfer failed.");
+        emit PrizeWithdrawn(_challengeId, msg.sender, matchChallenges[_challengeId].bet * 2);
     }
 
     function updateReferee(uint256 _challengeId, address _newReferee) public {

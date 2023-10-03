@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import CreateChallengeBox from "../pages/sportsbook/CreateChallengeBox";
 import ChallengeCard from "./sportsbook/ChallengeCard";
 import { Card, CardBody, Flex, Heading } from "@chakra-ui/react";
+// import { BigNumber } from "ethers";
 import type { NextPage } from "next";
 import { MetaHeader } from "~~/components/MetaHeader";
 import { useScaffoldEventHistory, useScaffoldEventSubscriber } from "~~/hooks/scaffold-eth";
@@ -13,6 +14,7 @@ import {
   ChallengeCreatedProps,
   ChallengeResultProps,
   ChallengeStartedProps,
+  PrizeWithdrawnProps,
   UpdateRefereeRequestProps,
   UpdateRefereeResponseProps,
 } from "~~/types/SportsbookTypes";
@@ -24,6 +26,7 @@ const Home: NextPage = () => {
   const [challengeStartedHistory, setChallengeStartedHistory] = useState<ChallengeStartedProps[]>([]);
   const [challengeResultHistory, setChallengeResultHistory] = useState<ChallengeResultProps[]>([]);
   const [challengeCanceledHistory, setChallengeCanceledHistory] = useState<ChallengeCanceledProps[]>([]);
+  const [prizeWithdrawnHistory, setPrizeWithdrawnHistory] = useState<PrizeWithdrawnProps[]>([]);
   const [updateRefereeRequestHistory, setUpdateRefereeRequestHistory] = useState<UpdateRefereeRequestProps[]>([]);
   const [updateRefereeResponseHistory, setUpdateRefereeResponseHistory] = useState<UpdateRefereeResponseProps[]>([]);
 
@@ -59,6 +62,13 @@ const Home: NextPage = () => {
   const { data: ChallengeCanceledHistory } = useScaffoldEventHistory({
     contractName: "Sportsbook",
     eventName: "ChallengeCanceled",
+    fromBlock: Number(process.env.NEXT_PUBLIC_DEPLOY_BLOCK) || 0,
+    blockData: false,
+  });
+
+  const { data: PrizeWithdrawnHistory } = useScaffoldEventHistory({
+    contractName: "Sportsbook",
+    eventName: "PrizeWithdrawn",
     fromBlock: Number(process.env.NEXT_PUBLIC_DEPLOY_BLOCK) || 0,
     blockData: false,
   });
@@ -127,6 +137,15 @@ const Home: NextPage = () => {
     })) as ChallengeCanceledProps[];
     setChallengeCanceledHistory(mappedHistory);
   }, [ChallengeCanceledHistory]);
+
+  useEffect(() => {
+    const mappedHistory = PrizeWithdrawnHistory?.map(event => ({
+      challengeId: event.args[0].toString(),
+      team: event.args[1],
+      amount: event.args[2].toString(),
+    })) as PrizeWithdrawnProps[];
+    setPrizeWithdrawnHistory(mappedHistory);
+  }, [PrizeWithdrawnHistory]);
 
   useEffect(() => {
     if (UpdateRefereeRequestHistory) {
@@ -232,6 +251,21 @@ const Home: NextPage = () => {
 
   useScaffoldEventSubscriber({
     contractName: "Sportsbook",
+    eventName: "PrizeWithdrawn",
+    listener: (challengeId, team, amount) => {
+      setPrizeWithdrawnHistory(indexedHistory => {
+        const newPrizeWithdrawn: PrizeWithdrawnProps = {
+          challengeId: parseInt(challengeId.toString()),
+          team,
+          amount: parseInt(amount.toString()),
+        };
+        return [newPrizeWithdrawn, ...indexedHistory];
+      });
+    },
+  });
+
+  useScaffoldEventSubscriber({
+    contractName: "Sportsbook",
     eventName: "UpdateRefereeRequest",
     listener: (challengeId, proposingTeam, newReferee) => {
       setUpdateRefereeRequestHistory(indexedHistory => {
@@ -269,6 +303,10 @@ const Home: NextPage = () => {
     const challengeCanceled = challengeCanceledHistory?.find(
       canceled => canceled.challengeId === challenge.challengeId,
     );
+    const prizeWithdrawn = prizeWithdrawnHistory?.filter(
+      withdrawal => withdrawal.challengeId.toString() === challenge.challengeId.toString(),
+    );
+    // console.log("Prize withdrawn filtered per challenge ID: ", prizeWithdrawn);
     const updateRefereeRequests = updateRefereeRequestHistory?.filter(
       request => request.challengeId.toString() === challenge.challengeId.toString(),
     );
@@ -309,6 +347,7 @@ const Home: NextPage = () => {
       challengeStarted,
       challengeResult,
       challengeCanceled,
+      prizeWithdrawn,
       updateRefereeEvent: eventToShow,
     };
   });
@@ -361,6 +400,7 @@ const Home: NextPage = () => {
                       challengeStarted,
                       challengeResult,
                       challengeCanceled,
+                      prizeWithdrawn,
                       updateRefereeEvent,
                     }) => (
                       <ChallengeCard
@@ -370,6 +410,7 @@ const Home: NextPage = () => {
                         challengeStarted={challengeStarted}
                         challengeResult={challengeResult}
                         challengeCanceled={challengeCanceled}
+                        prizeWithdrawn={prizeWithdrawn}
                         updateRefereeRequest={updateRefereeEvent?.request}
                         updateRefereeAccepted={updateRefereeEvent?.response}
                       />

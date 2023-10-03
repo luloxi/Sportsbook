@@ -5,7 +5,7 @@ const contracts = {
       name: "localhost",
       contracts: {
         Sportsbook: {
-          address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+          address: "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
           abi: [
             {
               anonymous: false,
@@ -154,6 +154,31 @@ const contracts = {
                 },
               ],
               name: "ChallengeStarted",
+              type: "event",
+            },
+            {
+              anonymous: false,
+              inputs: [
+                {
+                  indexed: true,
+                  internalType: "uint256",
+                  name: "challengeId",
+                  type: "uint256",
+                },
+                {
+                  indexed: true,
+                  internalType: "address",
+                  name: "team",
+                  type: "address",
+                },
+                {
+                  indexed: false,
+                  internalType: "uint256",
+                  name: "amount",
+                  type: "uint256",
+                },
+              ],
+              name: "PrizeWithdrawn",
               type: "event",
             },
             {
@@ -325,6 +350,26 @@ const contracts = {
                   internalType: "address",
                   name: "referee",
                   type: "address",
+                },
+                {
+                  internalType: "uint8",
+                  name: "team1Result",
+                  type: "uint8",
+                },
+                {
+                  internalType: "uint8",
+                  name: "team2Result",
+                  type: "uint8",
+                },
+                {
+                  internalType: "bool",
+                  name: "team1Withdrawn",
+                  type: "bool",
+                },
+                {
+                  internalType: "bool",
+                  name: "team2Withdrawn",
+                  type: "bool",
                 },
               ],
               stateMutability: "view",
@@ -554,6 +599,19 @@ const contracts = {
                 },
               ],
               stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "uint256",
+                  name: "_challengeId",
+                  type: "uint256",
+                },
+              ],
+              name: "withdrawPrize",
+              outputs: [],
+              stateMutability: "nonpayable",
               type: "function",
             },
           ],

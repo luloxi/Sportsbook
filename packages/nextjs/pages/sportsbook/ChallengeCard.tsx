@@ -14,6 +14,7 @@ const ChallengeCard = ({
   challengeStarted,
   challengeResult,
   challengeCanceled,
+  prizeWithdrawn,
   updateRefereeRequest,
   updateRefereeAccepted,
 }: ChallengeCardProps) => {
@@ -23,55 +24,79 @@ const ChallengeCard = ({
   const [completeChallengeTeam2Score, setCompleteChallengeTeam2Score] = useState<string>("");
 
   const { address } = useAccount();
+  const currentChallengeId = challenge.challengeId.toString()
+    ? BigNumber.from(challenge.challengeId.toString())
+    : BigNumber.from(0);
+
+  const team1PrizeClaimed = prizeWithdrawn?.some(
+    event => event.challengeId === challenge.challengeId && event.team === challenge.team1,
+  );
+  const team2PrizeClaimed = prizeWithdrawn?.some(
+    event => event.challengeId === challenge.challengeId && event.team === challenge.team2,
+  );
+
+  const isTeam1 = address === challenge.team1;
+  const isTeam2 = address === challenge.team2;
+  // const isReferee = address === refereeAddress;
+
+  const userTeamWon =
+    (challengeResult && isTeam1 && challengeResult.team1Result > challengeResult.team2Result) ||
+    (challengeResult && isTeam2 && challengeResult.team1Result < challengeResult.team2Result);
+  const userTeamTied =
+    (challengeResult && isTeam1 && challengeResult.team1Result == challengeResult.team2Result) ||
+    (challengeResult && isTeam2 && challengeResult.team1Result == challengeResult.team2Result);
 
   const { writeAsync: acceptChallenge } = useScaffoldContractWrite({
     contractName: "Sportsbook",
     functionName: "acceptChallenge",
-    args: [challenge.challengeId.toString() ? BigNumber.from(challenge.challengeId.toString()) : BigNumber.from(0)],
+    args: [currentChallengeId],
     value: challenge.bet ? ethers.utils.formatEther(challenge.bet.toString()) : undefined,
   });
 
   const { writeAsync: deleteChallenge } = useScaffoldContractWrite({
     contractName: "Sportsbook",
     functionName: "deleteChallenge",
-    args: [challenge.challengeId.toString() ? BigNumber.from(challenge.challengeId.toString()) : BigNumber.from(0)],
+    args: [currentChallengeId],
   });
 
   const { writeAsync: startChallenge } = useScaffoldContractWrite({
     contractName: "Sportsbook",
     functionName: "startChallenge",
-    args: [challenge.challengeId.toString() ? BigNumber.from(challenge.challengeId.toString()) : undefined],
+    args: [currentChallengeId],
   });
 
   const { writeAsync: completeChallenge } = useScaffoldContractWrite({
     contractName: "Sportsbook",
     functionName: "completeChallenge",
     args: [
-      challenge.challengeId.toString() ? BigNumber.from(challenge.challengeId.toString()) : undefined,
+      currentChallengeId,
       completeChallengeTeam1Score ? parseInt(completeChallengeTeam1Score) : undefined,
       completeChallengeTeam2Score ? parseInt(completeChallengeTeam2Score) : undefined,
     ],
   });
 
+  const { writeAsync: withdrawPrize } = useScaffoldContractWrite({
+    contractName: "Sportsbook",
+    functionName: "withdrawPrize",
+    args: [currentChallengeId],
+  });
+
   const { writeAsync: updateReferee } = useScaffoldContractWrite({
     contractName: "Sportsbook",
     functionName: "updateReferee",
-    args: [
-      challenge.challengeId.toString() ? BigNumber.from(challenge.challengeId.toString()) : undefined,
-      updateRefereeAddress,
-    ],
+    args: [currentChallengeId, updateRefereeAddress],
   });
 
   const { writeAsync: answerYesToUpdateReferee } = useScaffoldContractWrite({
     contractName: "Sportsbook",
     functionName: "answerUpdateReferee",
-    args: [challenge.challengeId.toString() ? BigNumber.from(challenge.challengeId.toString()) : undefined, true],
+    args: [currentChallengeId, true],
   });
 
   const { writeAsync: answerNoToUpdateReferee } = useScaffoldContractWrite({
     contractName: "Sportsbook",
     functionName: "answerUpdateReferee",
-    args: [challenge.challengeId.toString() ? BigNumber.from(challenge.challengeId.toString()) : undefined, false],
+    args: [currentChallengeId, false],
   });
 
   useEffect(() => {
@@ -104,8 +129,8 @@ const ChallengeCard = ({
                       Team 1 won!
                     </Text>
                     <Text fontSize={"md"} marginTop={0} marginBottom={0}>
-                      The {parseFloat(ethers.utils.formatEther((challenge.bet * 2).toString())).toFixed(4)} ETH prize is
-                      theirs!
+                      The {parseFloat(ethers.utils.formatEther((challenge.bet * 2).toString())).toFixed(4)} ETH prize is{" "}
+                      {userTeamWon ? "yours!" : "theirs!"}
                     </Text>
                   </>
                 ) : challengeResult.team1Result < challengeResult.team2Result ? (
@@ -115,7 +140,7 @@ const ChallengeCard = ({
                     </Text>
                     <Text fontSize={"md"} marginTop={0} marginBottom={0}>
                       The {parseFloat(ethers.utils.formatEther((challenge.bet * 2).toString())).toFixed(4)} ETH prize is
-                      theirs!
+                      {userTeamWon ? "yours!" : "theirs!"}
                     </Text>
                   </>
                 ) : (
@@ -124,8 +149,8 @@ const ChallengeCard = ({
                       It&apos;s a tie!
                     </Text>
                     <Text fontSize={"md"} marginTop={0} marginBottom={0}>
-                      {parseFloat(ethers.utils.formatEther(challenge.bet.toString())).toFixed(4)} ETH minus fees was
-                      returned to each team.
+                      {parseFloat(ethers.utils.formatEther(challenge.bet.toString())).toFixed(4)} ETH can be claimed
+                      back by each team.
                     </Text>
                   </>
                 )}
@@ -189,20 +214,59 @@ const ChallengeCard = ({
                     ETH)
                   </Button>
                 )}
-
                 {address == refereeAddress && challengeAccepted && !challengeStarted && !challengeCanceled && (
                   <Button onClick={() => startChallenge()} backgroundColor={"blue"} textColor={"white"}>
                     Start challenge
                   </Button>
                 )}
-
                 {(address == challenge.team1 || address == challenge.team2 || address == challenge.referee) &&
                   !challengeStarted &&
                   !challengeCanceled && (
                     <Button onClick={() => deleteChallenge()} backgroundColor={"red"} textColor={"white"}>
                       Delete and refund
                     </Button>
-                  )}
+                  )}{" "}
+                {/* Button to withdraw prize */}
+                {challengeResult && (
+                  <>
+                    {/* Team1 won or tied */}
+                    {isTeam1 && (userTeamWon || userTeamTied) && !team1PrizeClaimed && (
+                      <Button
+                        onClick={() => withdrawPrize()}
+                        backgroundColor={"green"}
+                        textColor={"white"}
+                        isDisabled={team1PrizeClaimed}
+                      >
+                        Withdraw Prize
+                      </Button>
+                    )}
+                    {/* Team2 won or tied */}
+                    {isTeam2 && (userTeamWon || userTeamTied) && !team2PrizeClaimed && (
+                      <Button
+                        onClick={() => withdrawPrize()}
+                        backgroundColor={"green"}
+                        textColor={"white"}
+                        isDisabled={team2PrizeClaimed}
+                      >
+                        Withdraw Prize
+                      </Button>
+                    )}
+                    {/* Won and already withdrawn*/}
+                    {challengeResult.team1Result != challengeResult.team2Result &&
+                      (team1PrizeClaimed || team2PrizeClaimed) && (
+                        <Button isDisabled backgroundColor={"gray"} textColor={"white"}>
+                          Prize Withdrawn
+                        </Button>
+                      )}
+                    {/* Tied and already withdrawn */}
+                    {challengeResult.team1Result == challengeResult.team2Result &&
+                      ((isTeam1 && team1PrizeClaimed) || (isTeam2 && team2PrizeClaimed)) && (
+                        <Button isDisabled backgroundColor={"gray"} textColor={"white"}>
+                          Prize Withdrawn
+                        </Button>
+                      )}
+                  </>
+                )}
               </Flex>
               {address == refereeAddress && challengeStarted && !challengeResult && !challengeCanceled && (
                 <Flex justifyContent={"space-evenly"} gap={3}>

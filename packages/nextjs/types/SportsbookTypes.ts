@@ -32,6 +32,12 @@ export type ChallengeCanceledProps = {
   canceledBy: string;
 };
 
+export type PrizeWithdrawnProps = {
+  challengeId: number;
+  team: string;
+  amount: number;
+};
+
 export type UpdateRefereeRequestProps = {
   challengeId: number;
   proposingTeam: string;
@@ -50,6 +56,7 @@ export type ChallengeCardProps = {
   challengeStarted?: ChallengeStartedProps;
   challengeResult?: ChallengeResultProps;
   challengeCanceled?: ChallengeCanceledProps;
+  prizeWithdrawn?: PrizeWithdrawnProps[];
   updateRefereeRequest?: UpdateRefereeRequestProps;
   updateRefereeAccepted?: UpdateRefereeResponseProps;
 };
