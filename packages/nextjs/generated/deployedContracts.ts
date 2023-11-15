@@ -617,13 +617,8 @@ const contracts = {
           ],
         },
         TicTacToe: {
-          address: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          address: "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853",
           abi: [
-            {
-              inputs: [],
-              stateMutability: "nonpayable",
-              type: "constructor",
-            },
             {
               anonymous: false,
               inputs: [
@@ -636,11 +631,17 @@ const contracts = {
                 {
                   indexed: true,
                   internalType: "address",
-                  name: "canceler",
+                  name: "team1",
+                  type: "address",
+                },
+                {
+                  indexed: true,
+                  internalType: "address",
+                  name: "team2",
                   type: "address",
                 },
               ],
-              name: "GameCanceled",
+              name: "GameAccepted",
               type: "event",
             },
             {
@@ -667,7 +668,7 @@ const contracts = {
                 {
                   indexed: false,
                   internalType: "uint256",
-                  name: "betAmount",
+                  name: "bet",
                   type: "uint256",
                 },
               ],
@@ -725,115 +726,35 @@ const contracts = {
               type: "event",
             },
             {
-              anonymous: false,
-              inputs: [
-                {
-                  indexed: true,
-                  internalType: "bytes32",
-                  name: "gameId",
-                  type: "bytes32",
-                },
-                {
-                  indexed: true,
-                  internalType: "address",
-                  name: "winner",
-                  type: "address",
-                },
-                {
-                  indexed: false,
-                  internalType: "uint256",
-                  name: "amount",
-                  type: "uint256",
-                },
-              ],
-              name: "PrizeClaimed",
-              type: "event",
-            },
-            {
               inputs: [
                 {
                   internalType: "address",
-                  name: "",
+                  name: "_player2",
                   type: "address",
-                },
-              ],
-              name: "allowedWithdrawal",
-              outputs: [
-                {
-                  internalType: "bool",
-                  name: "",
-                  type: "bool",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "address",
-                  name: "",
-                  type: "address",
-                },
-              ],
-              name: "balances",
-              outputs: [
-                {
-                  internalType: "uint256",
-                  name: "",
-                  type: "uint256",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "bytes32",
-                  name: "gameId",
-                  type: "bytes32",
-                },
-              ],
-              name: "cancelGame",
-              outputs: [],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "bytes32",
-                  name: "gameId",
-                  type: "bytes32",
-                },
-              ],
-              name: "claimPrize",
-              outputs: [],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "bytes32",
-                  name: "gameId",
-                  type: "bytes32",
-                },
-                {
-                  internalType: "address",
-                  name: "player2",
-                  type: "address",
-                },
-                {
-                  internalType: "uint256",
-                  name: "betAmount",
-                  type: "uint256",
                 },
               ],
               name: "createGame",
-              outputs: [],
+              outputs: [
+                {
+                  internalType: "bytes32",
+                  name: "gameId",
+                  type: "bytes32",
+                },
+              ],
               stateMutability: "payable",
+              type: "function",
+            },
+            {
+              inputs: [],
+              name: "gameIdCounter",
+              outputs: [
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
+                },
+              ],
+              stateMutability: "view",
               type: "function",
             },
             {
@@ -857,19 +778,29 @@ const contracts = {
                   type: "address",
                 },
                 {
-                  internalType: "uint256",
-                  name: "betAmount",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "startTime",
-                  type: "uint256",
-                },
-                {
                   internalType: "enum TicTacToe.GameState",
                   name: "state",
                   type: "uint8",
+                },
+                {
+                  internalType: "uint256",
+                  name: "bet",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "lastMoveTime",
+                  type: "uint256",
+                },
+                {
+                  internalType: "bool",
+                  name: "player1Withdrawn",
+                  type: "bool",
+                },
+                {
+                  internalType: "bool",
+                  name: "player2Withdrawn",
+                  type: "bool",
                 },
               ],
               stateMutability: "view",
@@ -879,7 +810,26 @@ const contracts = {
               inputs: [
                 {
                   internalType: "bytes32",
-                  name: "gameId",
+                  name: "_gameId",
+                  type: "bytes32",
+                },
+              ],
+              name: "getBoard",
+              outputs: [
+                {
+                  internalType: "uint8[9]",
+                  name: "",
+                  type: "uint8[9]",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "bytes32",
+                  name: "_gameId",
                   type: "bytes32",
                 },
                 {
@@ -890,60 +840,7 @@ const contracts = {
               ],
               name: "makeMove",
               outputs: [],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-            {
-              inputs: [],
-              name: "owner",
-              outputs: [
-                {
-                  internalType: "address",
-                  name: "",
-                  type: "address",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [
-                {
-                  internalType: "uint256",
-                  name: "newRate",
-                  type: "uint256",
-                },
-              ],
-              name: "setTaxRate",
-              outputs: [],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-            {
-              inputs: [],
-              name: "taxRate",
-              outputs: [
-                {
-                  internalType: "uint256",
-                  name: "",
-                  type: "uint256",
-                },
-              ],
-              stateMutability: "view",
-              type: "function",
-            },
-            {
-              inputs: [],
-              name: "withdraw",
-              outputs: [],
-              stateMutability: "nonpayable",
-              type: "function",
-            },
-            {
-              inputs: [],
-              name: "withdrawTax",
-              outputs: [],
-              stateMutability: "nonpayable",
+              stateMutability: "payable",
               type: "function",
             },
           ],

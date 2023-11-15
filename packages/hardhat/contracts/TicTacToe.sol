@@ -1,181 +1,120 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.17;
 
+/**
+ * @title A Tic Tac Toe game
+ * @author Lulox
+ * @notice This contract is for creating a bet between two parts on the outcome of a Tic Tac Toe Game
+ */
 contract TicTacToe {
-    address public owner;
-    uint256 public taxRate = 3; // 3% tax
     uint256 public gameIdCounter = 1;
 
     enum GameState {
-        Open,
-        InProgress,
-        Player1Won,
-        Player2Won,
-        Draw,
-        Canceled
+        PENDING,
+        PLAYING,
+        PLAYER1WON,
+        PLAYER2WON,
+        TIE,
+        CANCELED
     }
 
     struct Game {
         address player1;
         address player2;
-        uint256 betAmount;
-        uint256 startTime;
         GameState state;
+        uint256 bet;
+        uint256 lastMoveTime;
+        bool player1Withdrawn; // Indicates whether player 1 has withdrawn or not
+        bool player2Withdrawn; // Indicates whether player 2 has withdrawn or not
         uint8[9] board; // 0: empty, 1: X, 2: O
     }
 
-    mapping(address => uint256) public balances;
-    mapping(address => bool) public allowedWithdrawal;
-
     mapping(bytes32 => Game) public games;
 
-    event GameCreated(bytes32 indexed gameId, address indexed player1, address indexed player2, uint256 betAmount);
+    event GameCreated(bytes32 indexed gameId, address indexed player1, address indexed player2, uint256 bet);
+    event GameAccepted(bytes32 indexed gameId, address indexed team1, address indexed team2);
     event MoveMade(bytes32 indexed gameId, address indexed player, uint8 position);
     event GameFinished(bytes32 indexed gameId, address indexed winner, GameState state);
-    event PrizeClaimed(bytes32 indexed gameId, address indexed winner, uint256 amount);
-    event GameCanceled(bytes32 indexed gameId, address indexed canceler);
 
-    modifier onlyOwner() {
-        require(msg.sender == owner, "Not the contract owner");
-        _;
-    }
-
-    modifier onlyPlayers(uint256 gameId) {
+    modifier onlyPlayers(bytes32 gameId) {
         require(msg.sender == games[gameId].player1 || msg.sender == games[gameId].player2, "Not a player");
         _;
     }
 
-    modifier onlyValidMove(uint256 gameId, uint8 position) {
+    modifier onlyDuringGame(bytes32 gameId) {
+        require(games[gameId].state == GameState.PLAYING, "Game not in progress");
+        _;
+    }
+
+    modifier onlyValidMove(bytes32 gameId, uint8 position) {
         require(games[gameId].board[position] == 0, "Invalid move");
         _;
     }
 
-    modifier onlyDuringGame(uint256 gameId) {
-        require(games[gameId].state == GameState.InProgress, "Game not in progress");
-        _;
-    }
-
-    modifier onlyBeforeGame(uint256 gameId) {
-        require(games[gameId].state == GameState.Open, "Game already started");
-        _;
-    }
-
-    modifier onlyAfterGame(uint256 gameId) {
-        require(
-            games[gameId].state == GameState.Player1Won || games[gameId].state == GameState.Player2Won
-                || games[gameId].state == GameState.Draw || games[gameId].state == GameState.Canceled,
-            "Game not finished"
-        );
-        _;
-    }
-
-    constructor() {
-        owner = msg.sender;
-    }
-
-    function createGame(address player2, uint256 betAmount) external payable onlyBeforeGame {
-        require(msg.value == betAmount, "Incorrect bet amount");
-        bytes32 gameId = keccak256(abi.encodePacked(gameIdCounter, block.timestamp, msg.sender, player2));
+    function createGame(address _player2) external payable returns (bytes32 gameId) {
+        gameId = keccak256(abi.encodePacked(gameIdCounter, block.timestamp, msg.sender, _player2));
 
         games[gameId] = Game({
             player1: msg.sender,
-            player2: player2,
-            betAmount: betAmount,
-            startTime: block.timestamp,
-            state: GameState.InProgress,
+            player2: _player2,
+            state: GameState.PENDING,
+            bet: msg.value,
+            lastMoveTime: block.timestamp,
+            player1Withdrawn: false,
+            player2Withdrawn: false,
             board: [0, 0, 0, 0, 0, 0, 0, 0, 0]
         });
 
         gameIdCounter++;
 
-        emit GameCreated(gameId, msg.sender, player2, betAmount);
+        emit GameCreated(gameId, msg.sender, _player2, msg.value);
     }
 
-    function makeMove(uint256 gameId, uint8 position)
+    function makeMove(bytes32 _gameId, uint8 position)
         external
-        onlyPlayers(gameId)
-        onlyDuringGame(gameId)
-        onlyValidMove(gameId, position)
+        payable
+        onlyPlayers(_gameId)
+        onlyDuringGame(_gameId)
+        onlyValidMove(_gameId, position)
     {
-        require(msg.sender == getCurrentPlayer(gameId), "Not your turn");
+        if (games[_gameId].player2 == msg.sender && games[_gameId].state == GameState.PENDING) {
+            require(msg.value >= games[_gameId].bet, "Haven't sent enough ETH!");
+            acceptGame(_gameId);
+        }
+        require(msg.sender == getCurrentPlayer(_gameId), "Not your turn");
         require(position < 9, "Invalid position");
 
-        uint8 currentPlayerSymbol = getCurrentPlayerSymbol(gameId);
-        games[gameId].board[position] = currentPlayerSymbol;
+        uint8 currentPlayerSymbol = getCurrentPlayerSymbol(_gameId);
+        games[_gameId].board[position] = currentPlayerSymbol;
 
-        emit MoveMade(gameId, msg.sender, position);
+        emit MoveMade(_gameId, msg.sender, position);
 
-        if (checkWin(gameId, currentPlayerSymbol)) {
-            finishGame(gameId, msg.sender, GameState.Player1Won);
-        } else if (checkDraw(gameId)) {
-            finishGame(gameId, address(0), GameState.Draw);
-        } else {
-            toggleTurn(gameId);
-        }
+        // if (checkWin(_gameId, currentPlayerSymbol)) {
+        //     finishGame(_gameId, msg.sender, GameState.PLAYER1WON);
+        // } else if (checkDraw(_gameId)) {
+        //     finishGame(_gameId, address(0), GameState.TIE);
+        // } else {
+        //     toggleTurn(_gameId);
+        // }
     }
 
-    function claimPrize(uint256 gameId) external onlyAfterGame(gameId) {
-        address winner = getWinner(gameId);
-        require(winner == msg.sender, "You are not the winner");
-
-        uint256 prizeAmount = games[gameId].betAmount * 2;
-        balances[msg.sender] += prizeAmount;
-
-        emit PrizeClaimed(gameId, msg.sender, prizeAmount);
-
-        resetGame(gameId);
+    function getBoard(bytes32 _gameId) external view returns (uint8[9] memory) {
+        return games[_gameId].board;
     }
 
-    function cancelGame(uint256 gameId) external onlyBeforeGame(gameId) onlyPlayers(gameId) {
-        require(msg.sender == games[gameId].player1, "Not player1");
+    function acceptGame(bytes32 _gameId) internal {
+        games[_gameId].state = GameState.PLAYING;
+        games[_gameId].lastMoveTime = block.timestamp;
 
-        games[gameId].state = GameState.Canceled;
-        allowedWithdrawal[games[gameId].player1] = true;
-
-        emit GameCanceled(gameId, msg.sender);
+        emit GameAccepted(_gameId, games[_gameId].player1, games[_gameId].player2);
     }
 
-    function withdraw() external {
-        require(allowedWithdrawal[msg.sender], "Not allowed to withdraw");
-        uint256 amount = balances[msg.sender];
-        require(amount > 0, "No balance to withdraw");
-
-        balances[msg.sender] = 0;
-        allowedWithdrawal[msg.sender] = false;
-
-        (bool success,) = msg.sender.call{value: amount}("");
-        require(success, "Withdrawal failed");
+    function finishGame(bytes32 gameId, address winner, GameState state) internal {
+        games[gameId].state = state;
+        emit GameFinished(gameId, winner, state);
     }
 
-    function setTaxRate(uint256 newRate) external onlyOwner {
-        require(newRate <= 10, "Tax rate can't exceed 10%");
-        taxRate = newRate;
-    }
-
-    function withdrawTax() external onlyOwner {
-        uint256 taxAmount = address(this).balance * taxRate / 100;
-        require(taxAmount > 0, "No tax to withdraw");
-
-        (bool success,) = owner.call{value: taxAmount}("");
-        require(success, "Tax withdrawal failed");
-    }
-
-    // Internal functions
-
-    function getCurrentPlayer(uint256 gameId) internal view returns (address) {
-        return (block.timestamp / 2) % 2 == 0 ? games[gameId].player1 : games[gameId].player2;
-    }
-
-    function getCurrentPlayerSymbol(uint256 gameId) internal view returns (uint8) {
-        return getCurrentPlayer(gameId) == games[gameId].player1 ? 1 : 2;
-    }
-
-    function toggleTurn(uint256 gameId) internal {
-        allowedWithdrawal[games[gameId].player1] = !allowedWithdrawal[games[gameId].player1];
-        allowedWithdrawal[games[gameId].player2] = !allowedWithdrawal[games[gameId].player2];
-    }
-
-    function checkWin(uint256 gameId, uint8 playerSymbol) internal view returns (bool) {
+    function checkWin(bytes32 gameId, uint8 playerSymbol) internal view returns (bool) {
         uint8[3][8] memory winConditions = [
             [0, 1, 2],
             [3, 4, 5],
@@ -200,7 +139,7 @@ contract TicTacToe {
         return false;
     }
 
-    function checkDraw(uint256 gameId) internal view returns (bool) {
+    function checkDraw(bytes32 gameId) internal view returns (bool) {
         for (uint8 i = 0; i < 9; i++) {
             if (games[gameId].board[i] == 0) {
                 return false; // Game still has empty spots
@@ -210,17 +149,15 @@ contract TicTacToe {
         return true; // All spots filled, but no winner
     }
 
-    function finishGame(uint256 gameId, address winner, GameState state) internal {
-        games[gameId].state = state;
-        emit GameFinished(gameId, winner, state);
+    function getCurrentPlayerSymbol(bytes32 gameId) internal view returns (uint8) {
+        return getCurrentPlayer(gameId) == games[gameId].player1 ? 1 : 2;
     }
 
-    function resetGame(uint256 gameId) internal {
-        delete games[gameId];
+    // What is this function doing?????
+    function getCurrentPlayer(bytes32 gameId) internal view returns (address) {
+        return (block.timestamp / 2) % 2 == 0 ? games[gameId].player1 : games[gameId].player2;
     }
 
-    function getWinner(uint256 gameId) internal view returns (address) {
-        uint8 winnerSymbol = getCurrentPlayerSymbol(gameId) == 1 ? 2 : 1;
-        return winnerSymbol == 1 ? games[gameId].player1 : games[gameId].player2;
-    }
+    // Maybe this could be removed and the turn could be calculated by checking if the amount of moves is even or odd
+    function toggleTurn(bytes32 gameId) internal {}
 }
