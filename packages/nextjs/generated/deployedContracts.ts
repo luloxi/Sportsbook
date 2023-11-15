@@ -5,7 +5,7 @@ const contracts = {
       name: "localhost",
       contracts: {
         Sportsbook: {
-          address: "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
+          address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
           abi: [
             {
               anonymous: false,
@@ -610,6 +610,338 @@ const contracts = {
                 },
               ],
               name: "withdrawPrize",
+              outputs: [],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+          ],
+        },
+        TicTacToe: {
+          address: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          abi: [
+            {
+              inputs: [],
+              stateMutability: "nonpayable",
+              type: "constructor",
+            },
+            {
+              anonymous: false,
+              inputs: [
+                {
+                  indexed: true,
+                  internalType: "bytes32",
+                  name: "gameId",
+                  type: "bytes32",
+                },
+                {
+                  indexed: true,
+                  internalType: "address",
+                  name: "canceler",
+                  type: "address",
+                },
+              ],
+              name: "GameCanceled",
+              type: "event",
+            },
+            {
+              anonymous: false,
+              inputs: [
+                {
+                  indexed: true,
+                  internalType: "bytes32",
+                  name: "gameId",
+                  type: "bytes32",
+                },
+                {
+                  indexed: true,
+                  internalType: "address",
+                  name: "player1",
+                  type: "address",
+                },
+                {
+                  indexed: true,
+                  internalType: "address",
+                  name: "player2",
+                  type: "address",
+                },
+                {
+                  indexed: false,
+                  internalType: "uint256",
+                  name: "betAmount",
+                  type: "uint256",
+                },
+              ],
+              name: "GameCreated",
+              type: "event",
+            },
+            {
+              anonymous: false,
+              inputs: [
+                {
+                  indexed: true,
+                  internalType: "bytes32",
+                  name: "gameId",
+                  type: "bytes32",
+                },
+                {
+                  indexed: true,
+                  internalType: "address",
+                  name: "winner",
+                  type: "address",
+                },
+                {
+                  indexed: false,
+                  internalType: "enum TicTacToe.GameState",
+                  name: "state",
+                  type: "uint8",
+                },
+              ],
+              name: "GameFinished",
+              type: "event",
+            },
+            {
+              anonymous: false,
+              inputs: [
+                {
+                  indexed: true,
+                  internalType: "bytes32",
+                  name: "gameId",
+                  type: "bytes32",
+                },
+                {
+                  indexed: true,
+                  internalType: "address",
+                  name: "player",
+                  type: "address",
+                },
+                {
+                  indexed: false,
+                  internalType: "uint8",
+                  name: "position",
+                  type: "uint8",
+                },
+              ],
+              name: "MoveMade",
+              type: "event",
+            },
+            {
+              anonymous: false,
+              inputs: [
+                {
+                  indexed: true,
+                  internalType: "bytes32",
+                  name: "gameId",
+                  type: "bytes32",
+                },
+                {
+                  indexed: true,
+                  internalType: "address",
+                  name: "winner",
+                  type: "address",
+                },
+                {
+                  indexed: false,
+                  internalType: "uint256",
+                  name: "amount",
+                  type: "uint256",
+                },
+              ],
+              name: "PrizeClaimed",
+              type: "event",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "address",
+                  name: "",
+                  type: "address",
+                },
+              ],
+              name: "allowedWithdrawal",
+              outputs: [
+                {
+                  internalType: "bool",
+                  name: "",
+                  type: "bool",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "address",
+                  name: "",
+                  type: "address",
+                },
+              ],
+              name: "balances",
+              outputs: [
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "bytes32",
+                  name: "gameId",
+                  type: "bytes32",
+                },
+              ],
+              name: "cancelGame",
+              outputs: [],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "bytes32",
+                  name: "gameId",
+                  type: "bytes32",
+                },
+              ],
+              name: "claimPrize",
+              outputs: [],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "bytes32",
+                  name: "gameId",
+                  type: "bytes32",
+                },
+                {
+                  internalType: "address",
+                  name: "player2",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "betAmount",
+                  type: "uint256",
+                },
+              ],
+              name: "createGame",
+              outputs: [],
+              stateMutability: "payable",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "bytes32",
+                  name: "",
+                  type: "bytes32",
+                },
+              ],
+              name: "games",
+              outputs: [
+                {
+                  internalType: "address",
+                  name: "player1",
+                  type: "address",
+                },
+                {
+                  internalType: "address",
+                  name: "player2",
+                  type: "address",
+                },
+                {
+                  internalType: "uint256",
+                  name: "betAmount",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "startTime",
+                  type: "uint256",
+                },
+                {
+                  internalType: "enum TicTacToe.GameState",
+                  name: "state",
+                  type: "uint8",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "bytes32",
+                  name: "gameId",
+                  type: "bytes32",
+                },
+                {
+                  internalType: "uint8",
+                  name: "position",
+                  type: "uint8",
+                },
+              ],
+              name: "makeMove",
+              outputs: [],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [],
+              name: "owner",
+              outputs: [
+                {
+                  internalType: "address",
+                  name: "",
+                  type: "address",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [
+                {
+                  internalType: "uint256",
+                  name: "newRate",
+                  type: "uint256",
+                },
+              ],
+              name: "setTaxRate",
+              outputs: [],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [],
+              name: "taxRate",
+              outputs: [
+                {
+                  internalType: "uint256",
+                  name: "",
+                  type: "uint256",
+                },
+              ],
+              stateMutability: "view",
+              type: "function",
+            },
+            {
+              inputs: [],
+              name: "withdraw",
+              outputs: [],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+            {
+              inputs: [],
+              name: "withdrawTax",
               outputs: [],
               stateMutability: "nonpayable",
               type: "function",
