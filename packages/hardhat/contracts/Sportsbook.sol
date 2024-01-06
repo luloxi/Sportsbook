@@ -114,6 +114,10 @@ contract Sportsbook {
         matchChallenges[_challengeId].team1Result = _team1Result;
         matchChallenges[_challengeId].team2Result = _team2Result;
         matchChallenges[_challengeId].state = MatchState.FINISHED;
+        uint256 refereeFee = matchChallenges[_challengeId].bet * 5 / 100;
+        (bool success,) = payable(msg.sender).call{value: refereeFee}("");
+        require(success, "Transfer failed.");
+        matchChallenges[_challengeId].bet -= refereeFee;
         emit ChallengeResult(
             _challengeId,
             matchChallenges[_challengeId].team1,
