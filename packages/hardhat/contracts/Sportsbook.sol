@@ -151,9 +151,9 @@ contract Sportsbook {
                 require(!matchChallenges[_challengeId].team2Withdrawn, "You have already withdrawn your share.");
                 matchChallenges[_challengeId].team2Withdrawn = true;
             }
-            (bool successTie,) = payable(msg.sender).call{value: matchChallenges[_challengeId].bet / 2}("");
+            (bool successTie,) = payable(msg.sender).call{value: matchChallenges[_challengeId].bet}("");
             require(successTie, "Transfer failed.");
-            emit PrizeWithdrawn(_challengeId, msg.sender, matchChallenges[_challengeId].bet / 2);
+            emit PrizeWithdrawn(_challengeId, msg.sender, matchChallenges[_challengeId].bet);
             return;
         }
 
