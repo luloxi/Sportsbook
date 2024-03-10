@@ -1,8 +1,8 @@
 // import Link from "next/link";
 import { useState } from "react";
 import { useEffect } from "react";
-import CreateChallengeBox from "../pages/sportsbook/CreateChallengeBox";
-import ChallengeCard from "./sportsbook/ChallengeCard";
+import ChallengeCard from "../components/sportsbook/ChallengeCard";
+import CreateChallengeBox from "../components/sportsbook/CreateChallengeBox";
 import { Card, CardBody, Flex, Heading } from "@chakra-ui/react";
 // import { BigNumber } from "ethers";
 import type { NextPage } from "next";
