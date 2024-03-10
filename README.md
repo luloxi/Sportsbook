@@ -2,6 +2,8 @@
 
 **Betting dapp using ChakraUI**
 
+## How can I contribute to this build?
+
 - 🐣 Project being developed by [Newbie's Lounge](https://lulox.notion.site/Newbie-s-Lounge-68ea7c4c5f1a4ec29786be6a76516878)
 - 👷‍♀️ To view current development tasks, [check the Issues on the Github repo](https://github.com/luloxi/Sportsbook/issues).
 - 🧰 To chat with other buidlers about this project, [join Newbies Lounge Telegram group](https://t.me/+FwCZPG51UhwzOTZh)
